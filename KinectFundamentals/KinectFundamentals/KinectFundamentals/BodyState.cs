@@ -14,11 +14,13 @@ namespace KinectFundamentals
         public Vector3 elbowRight;
         public Vector3 armRight;
 
+        public Vector3 handLeft;
         public override string ToString()
         {
             return "" + handRight.X + ":" + handRight.Y + ":" + handRight.Z + ":" +
                 elbowRight.X + ":" + elbowRight.Y + ":" + elbowRight.Z + ":" +
-                armRight.X + ":" + armRight.Y + ":" + armRight.Z;
+                armRight.X + ":" + armRight.Y + ":" + armRight.Z + ":" +
+                handLeft.X + ":" + handLeft.Y + ":" + handLeft.Z + ":";
         }
 
         public void deString(string str)
@@ -41,6 +43,11 @@ namespace KinectFundamentals
 
             armRight = new Vector3(armX, armY, armZ);
 
+            float hand2X = float.Parse(str.Split(':')[9]);
+            float hand2Y = float.Parse(str.Split(':')[10]);
+            float hand2Z = float.Parse(str.Split(':')[11]);
+
+            handLeft = new Vector3(hand2X, hand2Y, hand2Z);
         }
 
         public BodyState(Skeleton s)
@@ -56,6 +63,10 @@ namespace KinectFundamentals
             armRight.Y = s.Joints[JointType.ShoulderRight].Position.Y;
             armRight.Z = s.Joints[JointType.ShoulderRight].Position.Z;
 
+            handLeft.X = s.Joints[JointType.WristLeft].Position.X;
+            handLeft.Y = s.Joints[JointType.WristLeft].Position.Y;
+            handLeft.Z = s.Joints[JointType.WristLeft].Position.Z;
+
         }
         public BodyState(string str)
         {
@@ -70,16 +81,21 @@ namespace KinectFundamentals
                 float elbowX = float.Parse(str.Split(':')[3]);
                 float elbowY = float.Parse(str.Split(':')[4]);
                 float elbowZ = float.Parse(str.Split(':')[5]);
-
+                
                 elbowRight = new Vector3(elbowX, elbowY, elbowZ);
 
                 float armX = float.Parse(str.Split(':')[6]);
                 float armY = float.Parse(str.Split(':')[7]);
-                float armZ=0;
-                if(str.Split(':')[8]!=null && str.Split(':')[8]!="")
-                    armZ = float.Parse(str.Split(':')[8]);
+                float armZ = float.Parse(str.Split(':')[8]);
 
                 armRight = new Vector3(armX, armY, armZ);
+
+                float hand2X = float.Parse(str.Split(':')[9]);
+                float hand2Y = float.Parse(str.Split(':')[10]);
+                float hand2Z = float.Parse(str.Split(':')[11]);
+
+                handLeft = new Vector3(hand2X, hand2Y, hand2Z);
+
             }
         }
 

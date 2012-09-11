@@ -62,8 +62,8 @@ namespace KinectFundamentals
         // Effect effect;
 
         ///////// secondary kinect
-        string pos = "";
-        string res = "";
+      //  string pos = "";
+        string result = "";
 
 
         private Client pipeClient;
@@ -72,7 +72,7 @@ namespace KinectFundamentals
         {
             //   this.tbReceived.Text += message + "\r\n";
             //uaktualniæ UI
-            res = message;
+            result = message;
         }
         void pipeClient_MessageReceived(string message)
         {
@@ -87,29 +87,33 @@ namespace KinectFundamentals
 
         static int angle = 360;
         static int angle2 = 0;
-        int a = 0;
-        float b = 0;
+        //int a = 0;
+       // float b = 0;
 
-        int begin = 0;
+       // int begin = 0;
 
         Effect effect2;
 
         VertexPositionColor[] vertices;
 
-        private void updateVertices(int angle, int a, float x, float y)
+        private void updateVertices(int angle, int begin, float x, float y)
         {
-            int verts = angle / 2;
-            begin = a;
-            for (int i = begin; i < begin + verts * 2; i++)
-                vertices[i - begin].Color = Color.Red;
-            for (int i = begin; i < begin + verts * 2; i += 2)
-                vertices[i - begin].Position = new Vector3(x + (float)Math.Sin(i / Math.PI / 18.0) * 0.1f, y + b + (float)Math.Cos(i / Math.PI / 18.0) * 0.1f * (640.0f / 480.0f), -50);
+           // int verts = angle / 2;
+            //begin = a;
 
-            for (int i = begin + 1; i < begin + verts * 2; i += 2)
-                vertices[i - begin].Position = new Vector3(x + (float)Math.Sin(i / Math.PI / 18.0) * 0.12f, y + b + (float)Math.Cos(i / Math.PI / 18.0) * 0.12f * (640.0f / 480.0f), -50);
+            float mnoznik = 1.33333333f;//640/480
+            double pi18 = Math.PI * 18.0;
+            int bpv2 = begin + angle;
+            for (int i = begin; i < bpv2; i++)
+                vertices[i - begin].Color = Color.Red;
+            for (int i = begin; i < bpv2; i += 2)
+                vertices[i - begin].Position = new Vector3(x + (float)Math.Sin(i / pi18) * 0.1f, y + (float)Math.Cos(i /pi18) * 0.1f*  mnoznik, -50);
+
+            for (int i = begin + 1; i < bpv2; i += 2)
+                vertices[i - begin].Position = new Vector3(x + (float)Math.Sin(i / pi18) * 0.12f, y + (float)Math.Cos(i / pi18) * 0.12f * mnoznik, -50);
 
         }
-
+       
         private void SetupVertices(int verts)
         {
             // verts = angle * 2;
@@ -138,7 +142,7 @@ namespace KinectFundamentals
         }
 
 
-        string connectedStatus = "Not connected";
+        //string connectedStatus = "Not connected";
 
         public Game1()
         {
@@ -200,19 +204,19 @@ namespace KinectFundamentals
             }
             catch
             {
-                connectedStatus = "Unable to start the Kinect Sensor";
+             //   connectedStatus = "Unable to start the Kinect Sensor";
                 return false;
             }
             return true;
         }
         Vector2 positionFromJoint(Joint j)
         {
-            Vector2 resPosition = new Vector2((((0.5f * j.Position.X) + 0.5f) * (100)), (((-0.5f * j.Position.Y) + 0.5f) * (100)));
+            Vector2 resPosition = new Vector2(j.Position.X, -j.Position.Y);
             return resPosition;
         }
         Vector2 positionFromJoint(Vector2 v)
         {
-            Vector2 resPosition = new Vector2((((0.5f * v.X) + 0.5f) * (100)), (((-0.5f * v.Y) + 0.5f) * (100)));
+            Vector2 resPosition = new Vector2((((v.X))), (((-v.Y))));
             return resPosition;
         }
 
@@ -243,7 +247,7 @@ namespace KinectFundamentals
                         Joint center = playerSkeleton.Joints[JointType.ShoulderCenter];
 
                         handPosition = positionFromJoint(rightHand);// Vector2((((0.5f * rightHand.Position.X) + 0.5f) * (640)), (((-0.5f * rightHand.Position.Y) + 0.5f) * (480)));
-                        handDepth = rightHand.Position.Z;
+                        handDepth = rightHand.Position.Z;//
                         hand2Position = positionFromJoint(leftHand);//new Vector2((((0.5f * leftHand.Position.X) + 0.5f) * (640)), (((-0.5f * leftHand.Position.Y) + 0.5f) * (480)));
                         hand2Depth = leftHand.Position.Z;
 
@@ -287,7 +291,8 @@ namespace KinectFundamentals
 
         byte[] pixelsFromFrame = new byte[1228800];//   byte[] pixelsFromFrame = new byte[colorImageFrame.PixelDataLength];
 
-
+        int h2 = 960;
+        int w2 = 1280;
         void kinectSensor_ColorFrameReady(object sender, ColorImageFrameReadyEventArgs e)
         {
             using (ColorImageFrame colorImageFrame = e.OpenColorImageFrame())
@@ -299,8 +304,7 @@ namespace KinectFundamentals
                     colorImageFrame.CopyPixelDataTo(pixelsFromFrame);
 
                     //utworzyæ sobie zmienne na height*2 i width*2
-                    int h2 = colorImageFrame.Height * 2;
-                    int w2 = colorImageFrame.Width * 2;
+                    
 
                     Color[] color = new Color[h2 * w2];//bez *4
                     kinectRGBVideo = new Texture2D(graphics.GraphicsDevice, w2, h2);//bez *2*2
@@ -311,13 +315,14 @@ namespace KinectFundamentals
 
                     for (int y = 0; y < h2; y += 2)
                     {
+                        int yw2 = y * w2;
                         for (int x = 0; x < w2; x += 2)
                         {
                             //int y2 = y * 2;
                             //int x2 = x * 2;
 
 
-                            int yw2x = y * w2 + x;
+                            int yw2x = yw2 + x;
                             color[yw2x + w2] =
                                 color[yw2x + 1] =
                                     color[yw2x] =
@@ -356,36 +361,36 @@ namespace KinectFundamentals
 
             if (this.kinectSensor == null)
             {
-                connectedStatus = "Found none Kinect Sensors connected to USB";
+                //connectedStatus = "Found none Kinect Sensors connected to USB";
                 return;
             }
-
+            /*
             // You can use the kinectSensor.Status to check for status
             // and give the user some kind of feedback
             switch (kinectSensor.Status)
             {
                 case KinectStatus.Connected:
                     {
-                        connectedStatus = "Status: Connected";
+                    //    connectedStatus = "Status: Connected";
                         break;
                     }
                 case KinectStatus.Disconnected:
                     {
-                        connectedStatus = "Status: Disconnected";
+                      //  connectedStatus = "Status: Disconnected";
                         break;
                     }
                 case KinectStatus.NotPowered:
                     {
-                        connectedStatus = "Status: Connect the power";
+                        //connectedStatus = "Status: Connect the power";
                         break;
                     }
                 default:
                     {
-                        connectedStatus = "Status: Error";
+                 //       connectedStatus = "Status: Error";
                         break;
                     }
             }
-
+            */
             // Init the found and connected device
             if (kinectSensor.Status == KinectStatus.Connected)
             {
@@ -438,10 +443,12 @@ namespace KinectFundamentals
         protected override void Update(GameTime gameTime)
         {
 
-            pos = res; //secondary Kinect
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
+           // pos = res; //secondary Kinect
+            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
             {
 
+              //  kinectSensor.Stop();
+              //  kinectSensor.Dispose();
                 this.Exit();
             }
 
@@ -450,7 +457,11 @@ namespace KinectFundamentals
 
 
         void renderJoint(Vector2 which, float depth, Matrix view, Matrix projection, float scale, Vector3 color, bool alpha)
-        {
+        { //niby to jest ok.
+
+           // depth *= 100;
+         //   scale *= 2;
+    
             foreach (ModelMesh mesh in mdRH.Meshes)
             {
                 //This is where the mesh orientation is set
@@ -469,24 +480,26 @@ namespace KinectFundamentals
                     //else
                      //   effect.DiffuseColor = new Vector3(1, 0, 0);
                     
-
+                    
                     effect.View = view;
                     effect.Projection = projection;
-                    effect.World = modelAbsTrans[mesh.ParentBone.Index]
+                    effect.World = modelAbsTrans[0]
                         *
-                        Matrix.CreateScale(scale*2) 
+                        Matrix.CreateScale(30) 
 
                         * Matrix.CreateTranslation(
-                        0 - depth *100, //to (*100) daje bardzo ³adne wyniki dla 1 m... niby wszystkie w metrach, ale coœ nie bangla chyba
-                     100-which.Y*2.5f,
-                     120 - which.X * 2.5f
+                        //by³o depth*=100
+                        -1*depth*2000, //to (*100) daje bardzo ³adne wyniki dla 1 m... niby wszystkie w metrach, ale coœ nie bangla chyba
+                     -1*which.Y*2000,//1*which.Y*400.0f, //100-Y*2.5
+                     -1*which.X * 2000.0f //120-X*2.5
+                     //centrum ekranu to 0,0
                      )
               //      320.0f - which.Y*2.0f,
               //          480.0f + -which.X*4.0f)//240.0-w.X*4
-                          *
-                        Matrix.CreateScale(1.0f/(scale * 2)) 
+                        //  *
+                       *Matrix.CreateScale(1.0f/(30)) 
                         ;
-                    System.Console.WriteLine(depth*100); //depth jest w m (depth * 100 w cm)
+                  //  System.Console.WriteLine(depth); //depth jest w m (depth * 100 w cm)
                 }
 
                 //Draw the mesh, will use the effects set above.
@@ -495,9 +508,10 @@ namespace KinectFundamentals
         }
 
         public static void draw(ModelMesh mesh, float scaleLength, float rotationAddition,
-            Vector2 upperInThisCase, Vector2 lowerInThisCase, Vector2 basePos, float baseDepth, Matrix view, Matrix projection,
+            Vector2 upperInThisCase, Vector2 lowerInThisCase, Vector2 basePos, float baseDepth, float secondDepth, Matrix view, Matrix projection,
             Matrix[] modelAbsTrans)
         {
+            float dX = upperInThisCase.X - lowerInThisCase.X;
             foreach (BasicEffect effect in mesh.Effects) //próba BE -> E
             {
                 effect.EnableDefaultLighting();
@@ -507,20 +521,29 @@ namespace KinectFundamentals
 
 
                 effect.World = modelAbsTrans[mesh.ParentBone.Index] *
-                    Matrix.CreateScale(2, 2, scaleLength) *
+                    Matrix.CreateScale(1, 1, scaleLength)  * Matrix.CreateTranslation(
+                    0 - baseDepth * 100,
+                    100.0f - basePos.Y * 2.5f,
+                    120.0f + -basePos.X * 2.5f) *
                     Matrix.CreateRotationX
                     (
                     rotationAddition +
                     (float)Math.Atan
                             (
-                                (upperInThisCase.X - lowerInThisCase.X) /
+                                dX /
                                 (upperInThisCase.Y - lowerInThisCase.Y)
                             )
+                    ) *
+                    Matrix.CreateRotationY
+                    (
+                    (float)Math.Atan
+                            (
+                                (baseDepth - secondDepth) /
+                                dX/40.0f
+                            )
                     )
-                    * Matrix.CreateTranslation(
-                    0 - baseDepth * 100,
-                    160.0f - basePos.Y * 4.0f,
-                    240.0f + -basePos.X * 4.0f);
+                  
+                  ;
 
             }
             mesh.Draw();
@@ -528,25 +551,55 @@ namespace KinectFundamentals
 
         int i = -1;
         bool nagrywanie = true;
-        Vector2 oldOneHand;
-        float oldDepthHand;
-        Vector2 oldOneElbow;
-        float oldDepthElbow;
-        Vector2 oldOneArm;
-        float oldDepthArm;
+        //bool pureView = true;
 
-        bool pureView = true;
+        void render(Vector2 jointPosFromState, float jointDepthFromState, Vector2 jointPos, float jointDepth,
+             Matrix view, Matrix proj, bool elements)
+        {
+            Vector3 jointNew = new Vector3(jointPosFromState.X, jointPosFromState.Y, jointDepthFromState);
+            Vector2 correctPos = new Vector2(jointNew.X, jointNew.Y);
+            float correctDepth = jointNew.Z;
+            jointNew = Vector3.Transform(jointNew, Matrix.CreateTranslation(-30.01f, -10f, 0f));
+            if (elements)
+            {
+                renderJoint(
+                        new Vector2(jointNew.X, jointNew.Y), jointNew.Z,
+
+                    view, proj, 1.5f, new Vector3(1, 0, 0), true); // mniej-wiêcej
+
+                renderJoint(
+                      new Vector2(jointPos.X, jointPos.Y), jointDepth,
+
+                  view, proj, 1.5f, new Vector3(1, 0, 0), true); // mniej-wiêcej
+            }
+            Vector2 jointFinal = new Vector2((jointNew.X + jointPos.X) / 2.0f,
+              (jointNew.Y + jointPos.Y) / 2.0f);
+            float jointDepthFinal = (jointNew.Z + jointDepth) / 2.0f;
+
+            renderJoint(
+              new Vector2(jointFinal.X, jointFinal.Y), jointDepthFinal,
+              view, proj, 1.5f, new Vector3(0, 1, 0), false); // mniej-wiêcej
+
+
+        }
+        // camera viewMatrix lookAt
+        Matrix view = Matrix.CreateLookAt(new Vector3(0, 0, 0), new Vector3(-1, 0, 0), new Vector3(0, 1, 0)); //?
+        static float kat = 43.0f; //k¹t widzenia w pionie
+        float floatPi = (float)Math.PI;
+        float floatPiPol = (float)Math.PI / 2.0f;
+        Matrix projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(kat), 4f / 3f, 0.1f, 10000); //57.8
+            
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
-
+            GraphicsDevice.Clear(Color.Red);
+                                            
             spriteBatch.Begin();
             spriteBatch.Draw(kinectRGBVideo, new Rectangle(0, 0, 1280, 960), Color.White);
 
-            float rot = (float)Math.PI / 2.0f;
+            float rot = floatPiPol;
             //rot =(float) Math.Atan(handPosition.X / handPosition.Y);
             if (handPosition.Y > 200)
-                rot += (float)Math.PI;
+                rot += floatPi;
             float scale = Math.Abs(handPosition.Y - 320.0f) / 100.0f;
             float scale2 = Math.Abs(hand2Position.Y - 320.0f) / 100.0f;
 
@@ -579,11 +632,11 @@ namespace KinectFundamentals
             // spriteBatch.DrawString(font, connectedStatus, new Vector2(20, 80), Color.White);
             spriteBatch.End();
             #endregion jakies_spritey
-            // camera viewMatrix lookAt
-            Matrix view = Matrix.CreateLookAt(new Vector3(1, 0, 0), new Vector3(0, 0, 0), new Vector3(0, 1, 0)); //?
 
-            Matrix projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(57.8f), 4f / 3f, 0.1f, 10000); //57.8
-            
+            renderJoint( //PUSTY
+              new Vector2(1, 0), 0,
+              view, projection, 1.0f, new Vector3(1, 0, 0), true); // mniej-wiêcej
+                
 
             if (ok == true)
             {
@@ -593,69 +646,115 @@ namespace KinectFundamentals
                // renderJoint(armLposition, armLdepth, view, projection, 1, new Vector3(1, 0, 0));
                // renderJoint(headPosition, headDepth, view, projection, 1, new Vector3(1, 0, 0));
 
-                renderJoint(elbowRposition, elbowRdepth, view, projection, 1, new Vector3(1, 0, 0), true);
-                renderJoint(armRposition, armRdepth, view, projection, 1, new Vector3(1, 0, 0), true);
-                renderJoint(handPosition, handDepth, view, projection, 1, new Vector3(1, 0, 0), true);
+           //     renderJoint(elbowRposition, elbowRdepth, view, projection, 1, new Vector3(1, 0, 0), true);
+           //     renderJoint(armRposition, armRdepth, view, projection, 1, new Vector3(1, 0, 0), true);
+           //     renderJoint(handPosition, handDepth, view, projection, 1, new Vector3(1, 0, 0), true);
                 #endregion old
 
+                renderJoint( // ten. 
+                  new Vector2(handPosition.X, handPosition.Y), handDepth,
+                  view, projection, 1.0f, new Vector3(1, 0.5f, 0.5f), false); // mniej-wiêcej
+                renderJoint( // ten. 
+                  new Vector2(elbowRposition.X, elbowRposition.Y), elbowRdepth,
+                  view, projection, 1.0f, new Vector3(0.5f, 1.0f, 0.5f), false); // mniej-wiêcej
+                  
                 //drugi Kinect
-                //bli¿szy i ni¿szy (ok 10 cm/10 cm)
-                   BodyState bs3 = new BodyState(pos);
-                /////////////////////////////////
+                   BodyState bs3 = new BodyState(result);
+              
+                   //render(correctPositionHand, bs3.handRight.Z, handPosition, handDepth, view, projection, false);
 
+                   Vector2 correctPositionElbow = positionFromJoint(new Vector2(bs3.elbowRight.X, bs3.elbowRight.Y));
+                   float correctDepthElbow = bs3.elbowRight.Z;
+                   Vector3 rightElbowNew = new Vector3(correctPositionElbow.X, correctPositionElbow.Y, correctDepthElbow);
+                //render(correctPositionHand, bs3.elbowRight.Z, elbowRposition, elbowRdepth, view, projection, false
+                   Vector2 correctPositionArm = positionFromJoint(new Vector2(bs3.armRight.X, bs3.armRight.Y));
+                 //  render(correctPositionArm, bs3.armRight.Z, armRposition, armRdepth, view, projection, false);
+
+                //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                    Vector2 correctPositionHand = positionFromJoint(new Vector2(bs3.handRight.X, bs3.handRight.Y));
                    float correctDepthHand = bs3.handRight.Z;
-                if(!pureView)
-                   renderJoint(correctPositionHand,
-                       correctDepthHand, view, projection, 1, new Vector3(0, 1, 0),  true);
+                   Vector3 rightHandNew = new Vector3(correctPositionHand.X, correctPositionHand.Y, correctDepthHand);
+                
+                //wybraæ coœ z tego:
 
-                //wypadkowy
+                //transformacja: 50 [cm],  15-20 (70-75) stopni
+                
+              //  rightHandNew = Vector3.Transform(rightHandNew, Matrix.CreateRotationY((float)(MathHelper.ToRadians(2))));
+           
+                //mo¿e to nie jest do koñca ok -> jakiœ kompromis?
+                rightHandNew = Vector3.Transform(rightHandNew, Matrix.CreateRotationY((float)(MathHelper.ToRadians(30))));
+                rightHandNew = Vector3.Transform(rightHandNew, Matrix.CreateTranslation(-0.5f, 0f, 0f));//50 //cm (jakiœ przelicznik x3?)
 
-                   if (handPosition.X != 0) //0, gdy b³¹d, chocia¿ te¿ na oœce
-                       oldOneHand = (correctPositionHand+handPosition)/2.0f; //uœrednienie wyników
-                   float depthResHand = (correctDepthHand+ handDepth)/2.0f;
-                   if (depthResHand != 0) //0, gdy b³¹d (poza takim przypadkiem, raczej nie 0)
-                       oldDepthHand = depthResHand;
-                   
-                renderJoint(oldOneHand,
-                        oldDepthHand, view, projection, 1, new Vector3(1, 1, 1), false);
+                rightElbowNew = Vector3.Transform(rightElbowNew, Matrix.CreateRotationY((float)(MathHelper.ToRadians(30))));
+                rightElbowNew = Vector3.Transform(rightElbowNew, Matrix.CreateTranslation(-0.5f, 0f, 0f));//50 //cm (jakiœ przelicznik x3?)
+                
+
+                //  rightHandNew = Vector3.Transform(rightHandNew, Matrix.CreateTranslation(-0.0f,0.5f,0.0f));
+              
+                
+                //  correctPositionHand = new Vector2(rightHandNew.X, rightHandNew.Y);
+              //  correctDepthHand = rightHandNew.Z;
+                
+                  renderJoint(
+                      new Vector2(rightHandNew.X, rightHandNew.Y),   rightHandNew.Z,  //NIE OK
+                      view, projection, 1.0f, new Vector3(1, 0, 0), true); // mniej-wiêcej
+
+                  renderJoint(
+                      new Vector2(rightElbowNew.X, rightElbowNew.Y), rightElbowNew.Z,  //NIE OK
+                      view, projection, 1.0f, new Vector3(0, 1, 0), true); // mniej-wiêcej
+
+                //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+               // Vector2 rightHandFinal = new Vector2((rightHandNew.X + handPosition.X) / 2.0f,
+               //       (rightHandNew.Y + handPosition.Y) / 2.0f);
+               //   float rightHandDepthFinal = (rightHandNew.Z + handDepth) / 2.0f;
+
+              //    renderJoint(
+              //      new Vector2(rightHandFinal.X, rightHandFinal.Y), rightHandDepthFinal,
+              //      view, projection, 1.5f, new Vector3(0, 0, 1), true); // mniej-wiêcej
+        
+
+            //    //wypadkowy
+            //if (!pureView)
+            //    renderJoint(correctPositionElbow,
+            //        correctDepthElbow, view, projection, 1, new Vector3(0, 1, 0), true);
+
+            //    //wypadkowy
+
+            //    if (elbowRposition.X != 0) //0, gdy b³¹d, chocia¿ te¿ na oœce
+            //        oldOneElbow = (correctPositionElbow + elbowRposition) / 2.0f; //uœrednienie wyników
+            //    float depthResElbow = (correctDepthElbow + elbowRdepth) / 2.0f;
+            //    if (depthResElbow != 0) //0, gdy b³¹d (poza takim przypadkiem, raczej nie 0)
+            //        oldDepthElbow = depthResElbow;
+
+           //     renderJoint(oldOneElbow,
+           //             oldDepthElbow, view, projection, 1, new Vector3(1, 1, 1), false);
                 /////////////////////////////////
 
-                Vector2 correctPositionElbow = positionFromJoint(new Vector2(bs3.elbowRight.X, bs3.elbowRight.Y));
-                float correctDepthElbow = bs3.elbowRight.Z;
-                if (!pureView)
-                renderJoint(correctPositionElbow,
-                    correctDepthElbow, view, projection, 1, new Vector3(0, 1, 0), true);
+           //     Vector2 correctPositionArm = positionFromJoint(new Vector2(bs3.armRight.X, bs3.armRight.Y));
+           //     float correctDepthArm = bs3.armRight.Z;
+           //     if (!pureView)
+           //     renderJoint(correctPositionArm,
+           //         correctDepthArm, view, projection, 1, new Vector3(0, 1, 0), true);
 
-                //wypadkowy
+           //     //wypadkowy
+           //     //tu bad:
+           //     if (armRposition.X != 0) //0, gdy b³¹d, chocia¿ te¿ na oœce
+           //         oldOneArm = (correctPositionArm + armRposition) / 2.0f; //uœrednienie wyników
+           //     float depthResArm = (correctDepthArm + armRdepth) / 2.0f;
+           //     if (depthResArm != 0) //0, gdy b³¹d (poza takim przypadkiem, raczej nie 0)
+           //         oldDepthArm = depthResArm;
 
-                if (elbowRposition.X != 0) //0, gdy b³¹d, chocia¿ te¿ na oœce
-                    oldOneElbow = (correctPositionElbow + elbowRposition) / 2.0f; //uœrednienie wyników
-                float depthResElbow = (correctDepthElbow + elbowRdepth) / 2.0f;
-                if (depthResElbow != 0) //0, gdy b³¹d (poza takim przypadkiem, raczej nie 0)
-                    oldDepthElbow = depthResElbow;
-
-                renderJoint(oldOneElbow,
-                        oldDepthElbow, view, projection, 1, new Vector3(1, 1, 1), false);
-                /////////////////////////////////
-
-                Vector2 correctPositionArm = positionFromJoint(new Vector2(bs3.armRight.X, bs3.armRight.Y));
-                float correctDepthArm = bs3.armRight.Z;
-                if (!pureView)
-                renderJoint(correctPositionArm,
-                    correctDepthArm, view, projection, 1, new Vector3(0, 1, 0), true);
-
-                //wypadkowy
-                //tu bad:
-                if (armRposition.X != 0) //0, gdy b³¹d, chocia¿ te¿ na oœce
-                    oldOneArm = (correctPositionArm + armRposition) / 2.0f; //uœrednienie wyników
-                float depthResArm = (correctDepthArm + armRdepth) / 2.0f;
-                if (depthResArm != 0) //0, gdy b³¹d (poza takim przypadkiem, raczej nie 0)
-                    oldDepthArm = depthResArm;
-
-                renderJoint(oldOneArm,
-                        oldDepthArm, view, projection, 1, new Vector3(1, 1, 1), false);
-                /////////////////////////////////
+           ////     renderJoint(oldOneArm,
+           ////             oldDepthArm, view, projection, 1, new Vector3(1, 1, 1), false);
+           //     //handPosition = oldOneHand;
+           //     elbowRposition = oldOneElbow;
+           //     armRposition = oldOneArm;
+           //     //handDepth = oldDepthHand;
+           //     elbowRdepth = oldDepthElbow;
+           //     armRdepth = oldDepthArm;
+           //     /////////////////////////////////
 
                 #region stare
                 //foreach (ModelMesh mesh in mdRH.Meshes) //right hand
@@ -778,25 +877,37 @@ namespace KinectFundamentals
                 //klocek prawego przedramienia
                 #endregion stare2
 
-                float kat = 0;
+                float kat2 = 0;
 
                 float katRamienia = 0;
 
+                float katPrzestrzenny = 0;
+                Vector3 hand = new Vector3(handPosition.X, handPosition.Y, handDepth);
+                Vector3 elbow = new Vector3(elbowRposition.X, elbowRposition.Y, elbowRdepth);
+                Vector3 arm = new Vector3(armRposition.X, armRposition.Y, armRdepth);
+                Vector3 toHand = -elbow+hand;
+                Vector3 toArm = -elbow+arm;
+                float res=0;
+                res = Vector3.Dot(toArm, toHand);
+                float handL = toHand.Length();
+                float armL = toArm.Length();
+                katPrzestrzenny = (float)(Math.Acos(res/(handL*armL))*180.0/Math.PI);
 
                 spriteBatch.Begin();
 
                 if (nagrywanie)
                 {
+                    float tempKat = (float)Math.Atan(
+                                                 (armRposition.X - elbowRposition.X) /
+                                                 (armRposition.Y - elbowRposition.Y)
+                                              );
                     kat = (
                           (float)Math.Atan(
                                                  (elbowRposition.X - handPosition.X) /
                                                  (elbowRposition.Y - handPosition.Y)
-                                              ) - (float)Math.Atan(
-                                                 (armRposition.X - elbowRposition.X) /
-                                                 (armRposition.Y - elbowRposition.Y)
-                                              )
+                                              ) - tempKat
                                               );
-                    kat = kat * 180.0f / (float)Math.PI;
+                    kat = kat * 180.0f / floatPi;
                     kat = (float)Math.Round(kat, 0);
                     if (handPosition.Y < elbowRposition.Y && kat < 0)
                     {
@@ -805,13 +916,8 @@ namespace KinectFundamentals
                     }
 
                     //k¹t do rsunku k¹ta:
-                    katRamienia = (
-                          (float)Math.Atan(
-                                                 (armRposition.X - elbowRposition.X) /
-                                                 (armRposition.Y - elbowRposition.Y)
-                                              )
-                                              );
-                    katRamienia = katRamienia * 180.0f / (float)Math.PI;
+                    katRamienia = tempKat;
+                    katRamienia = katRamienia * 180.0f / floatPi;
                     katRamienia = (float)Math.Round(katRamienia, 0);
 
                     // kat -= 90;
@@ -849,11 +955,11 @@ namespace KinectFundamentals
                             //    //Draw the mesh, will use the effects set above.
                             //    mesh.Draw();
                             #endregion old
-                     // TO JEST OK, KLOCEK:
-                     //       draw(mesh, 30, (float)(Math.PI / 2.0), elbowRposition, handPosition,
-                     //           elbowRposition, elbowRdepth,
-                     //            view, projection,
-                     //           modelAbsTrans);
+                    ////  TO JEST OK, KLOCEK:
+                    //        draw(mesh, 30, (float)(Math.PI / 2.0), elbowRposition, handPosition,
+                    //            elbowRposition, elbowRdepth, handDepth,
+                    //             view, projection,
+                    //            modelAbsTrans);
                         }
 
                     }
@@ -905,13 +1011,13 @@ namespace KinectFundamentals
                             ////Draw the mesh, will use the effects set above.
                             //mesh.Draw();
                             #endregion old
-                            // TO JEST OK, KLOCEK:
+                        //    // TO JEST OK, KLOCEK:
                         //    if (nagrywanie)
                         //        draw(mesh, 30, -(float)(Math.PI / 2.0), elbowRposition, handPosition, elbowRposition,
-                        //     elbowRdepth, view, projection, modelAbsTrans);
+                        //     elbowRdepth,handDepth, view, projection, modelAbsTrans);
                         //    else
                         //        draw(mesh, 30, -(float)(Math.PI / 2.0) + angles[i], elbowRposition, handPosition, elbowRposition,
-                        //elbowRdepth, view, projection, modelAbsTrans);
+                        //elbowRdepth,handDepth, view, projection, modelAbsTrans);
 
 
 
@@ -1063,11 +1169,15 @@ namespace KinectFundamentals
                     #endregion nagrywanie
                     if (!temp.Contains(char.ConvertFromUtf32(0x0105)))
                     {
-                        spriteBatch.DrawString(sf, "Right arm - right forearm angle:" + kat, new Vector2(10, 10), Color.Black);
+                      //  spriteBatch.DrawString(sf, "Right arm - right forearm angle:" + kat, new Vector2(10, 10), Color.Black);
+
+                        spriteBatch.DrawString(sf, "Right arm - right forearm angle:" + (int)katPrzestrzenny, new Vector2(10, 10), Color.White);
+                        spriteBatch.DrawString(sf, "" + (int)katPrzestrzenny, new Vector2(10, 90), Color.White);
+
                         // else
                         //   spriteBatch.DrawString(sf, "Right arm - right forearm angle:" + kat, new Vector2(armRposition.X, 750), Color.White);
 
-                        spriteBatch.DrawString(sf, "o", new Vector2(10 + 910, 0), Color.Black);
+                        spriteBatch.DrawString(sf, "o", new Vector2(920, 0), Color.White);
 
                     }
 
@@ -1097,11 +1207,11 @@ namespace KinectFundamentals
 
                             foreach (ModelMesh mesh in mdBox.Meshes)
                             {
-                                if (i > 0 && i < angles.Count)
-                                    draw(mesh, 30, (float)(Math.PI) + angles[i], elbowRposition, handPosition,
-                                        elbowRposition, elbowRdepth,
-                                         view, projection,
-                                        modelAbsTrans);
+                    //            if (i > 0 && i < angles.Count)
+                    //                draw(mesh, 30, (float)(Math.PI) + angles[i], elbowRposition, handPosition,
+                    //                    elbowRposition, elbowRdepth,handDepth,
+                    //                     view, projection,
+                    //                    modelAbsTrans);
                             }
 
                         }
@@ -1109,9 +1219,9 @@ namespace KinectFundamentals
                         {
                             foreach (ModelMesh mesh in mdBox.Meshes)
                             {
-                                if (i > 0 && i < angles.Count)
-                                    draw(mesh, 30, (float)(Math.PI) + angles[i], elbowRposition, handPosition, elbowRposition,
-                          elbowRdepth, view, projection, modelAbsTrans);
+                     //           if (i > 0 && i < angles.Count)
+                     //               draw(mesh, 30, (float)(Math.PI) + angles[i], elbowRposition, handPosition, elbowRposition,
+                     //     elbowRdepth, handDepth, view, projection, modelAbsTrans);
 
 
 
@@ -1127,11 +1237,11 @@ namespace KinectFundamentals
                 }
                 #endregion odtworzenie
                 spriteBatch.End();
-                spriteBatch.Begin();
+             //   spriteBatch.Begin();
                 //    string temp2 = "lala";
                 //  if (!temp.Contains(char.ConvertFromUtf32(0x0105)))
                 //      spriteBatch.DrawString(sf, "" + temp2, new Vector2(armRposition.X, armRposition.Y), Color.White);
-                spriteBatch.End();
+             //   spriteBatch.End();
 
             }
 
@@ -1145,12 +1255,11 @@ namespace KinectFundamentals
             foreach (EffectPass pass in effect2.CurrentTechnique.Passes)
             {
                 pass.Apply();
-
             }
 
-            if (angle * 2 - 2 - 360 <= 0)
+            if (angle - 181 <= 0)
                 angle = 182;
-            GraphicsDevice.DrawUserPrimitives(PrimitiveType.TriangleStrip, vertices, 0, angle * 2 - 2 - 360, VertexPositionColor.VertexDeclaration);
+            GraphicsDevice.DrawUserPrimitives(PrimitiveType.TriangleStrip, vertices, 0, angle * 2 - 362, VertexPositionColor.VertexDeclaration);
 
             ///////////////
             base.Draw(gameTime);
