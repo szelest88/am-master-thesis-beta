@@ -197,7 +197,7 @@ namespace KinectFundamentals
                 MaxDeviationRadius = 0.04f
             });
             kinectSensor.SkeletonFrameReady += new EventHandler<SkeletonFrameReadyEventArgs>(kinectSensor_SkeletonFrameReady);
-
+             
             try
             {
                 kinectSensor.Start();
