@@ -7,6 +7,7 @@ using Microsoft.Kinect;
 
 namespace KinectFundamentals
 {
+    [Serializable]
     class BodyState
     {
 
@@ -55,6 +56,7 @@ namespace KinectFundamentals
             handRight.X = s.Joints[JointType.WristRight].Position.X;
             handRight.Y = s.Joints[JointType.WristRight].Position.Y;
             handRight.Z = s.Joints[JointType.WristRight].Position.Z;
+
             elbowRight.X = s.Joints[JointType.ElbowRight].Position.X;
             elbowRight.Y = s.Joints[JointType.ElbowRight].Position.Y;
             elbowRight.Z = s.Joints[JointType.ElbowRight].Position.Z;
