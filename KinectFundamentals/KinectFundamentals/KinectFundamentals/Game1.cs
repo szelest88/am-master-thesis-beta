@@ -10,6 +10,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 using Microsoft.Kinect;
+using System.IO;
 
 namespace KinectFundamentals
 {
@@ -704,6 +705,16 @@ namespace KinectFundamentals
                 int initialTopPlay = 200;
                 bool recDown = false;
                 bool playDown = false;
+
+
+                int licznikod50do100 = 0;
+                string[] linie = new string[100];
+                string[] wczytane = new string[100];
+                float[] wczytaneNum = new float[100];
+
+
+                int i4 = 0;
+                int j4 = 0;
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.Green);
@@ -849,18 +860,18 @@ namespace KinectFundamentals
                 
 
                 //SPRAWDZIÆ ARGUMENTY DLA PONI¯SZYCH (...New)
-                renderJoint(//tu nawala
-                   new Vector2(
-                       (rightArmNew.X + armRposition.X) / 2f
-                       , (rightArmNew.Y + armRposition.Y) / 2f
-                       ), (rightArmNew.Z + armRdepth) / 2f, //rightHandNew.Z -> handDepth
-                   view, projection, 1.0f, new Vector3(1, 0, 0), false); // pi razy oko ok, ale ZA BARDZO ODSTAJE!!! 
-                renderJoint(//tu te¿
-                        new Vector2(
-                            (rightElbowNew.X)
-                            , (rightElbowNew.Y)
-                            ), (rightElbowNew.Z) , //rightHandNew.Z -> handDepth
-                        view, projection, 1.0f, new Vector3(0, 1, 0), false); // pi razy oko ok, ale ZA BARDZO ODSTAJE!!! 
+                //renderJoint(//tu nawala
+                //   new Vector2(
+                //       (rightArmNew.X + armRposition.X) / 2f
+                //       , (rightArmNew.Y + armRposition.Y) / 2f
+                //       ), (rightArmNew.Z + armRdepth) / 2f, //rightHandNew.Z -> handDepth
+                //   view, projection, 1.0f, new Vector3(1, 0, 0), false); // pi razy oko ok, ale ZA BARDZO ODSTAJE!!! 
+                //renderJoint(//tu te¿
+                //        new Vector2(
+                //            (rightElbowNew.X)
+                //            , (rightElbowNew.Y)
+                //            ), (rightElbowNew.Z) , //rightHandNew.Z -> handDepth
+                //        view, projection, 1.0f, new Vector3(0, 1, 0), false); // pi razy oko ok, ale ZA BARDZO ODSTAJE!!! 
           
 
                 Vector3 elbowFinal = new Vector3(
@@ -901,7 +912,91 @@ namespace KinectFundamentals
                 
                 if (!str.Contains(char.ConvertFromUtf32(0x0105)))
                   spriteBatch2.DrawString(sf, str, new Vector2(200, 700), Color.White);
-                  spriteBatch2.End();
+                 
+                  licznikod50do100++;
+                  if (150 > licznikod50do100 && licznikod50do100 >= 50)
+                  {
+                      linie[licznikod50do100 - 50] = ""+angle2;
+                  }
+                  if (licznikod50do100 == 150)
+                  {
+                      spriteBatch2.DrawString(sf,"ZAPISANO",new Vector2(200,700),Color.White);
+                      StreamWriter sw = File.CreateText(@"C:/saved.txt");
+                      for (int i = 0; i < 100; i++)
+                          sw.WriteLine("" + linie[i]);
+                      sw.Close();
+                  }
+
+                  if (licznikod50do100 > 150 && licznikod50do100 < 175)
+                  {
+                      spriteBatch2.DrawString(sf, "WCZYTYWANIE.", new Vector2(200, 800), Color.White);
+                      if (licznikod50do100 == 151)
+                      {
+                          wczytane = File.ReadAllLines(@"C:/saved.txt");
+                          for(int i=0;i<wczytane.Length;i++)
+                              wczytaneNum[i]=float.Parse(wczytane[i]);
+
+                      }
+                      
+                  }
+
+                  if (licznikod50do100 > 175)
+                  {
+                      spriteBatch2.DrawString(sf, "TESTOWANE", new Vector2(200, 800), Color.White);
+                   
+                      //i4++;
+                      //drawArc(new Vector3(armRposition.X, armRposition.Y, armRdepth),
+                     //     new Vector3(elbowRposition.X, elbowRposition.Y, elbowRdepth),
+
+
+
+
+                      /*
+                      if (i4 < wczytaneNum.Length - 1)
+                      {
+                          i4++;
+                          if (wczytaneNum[i4] > angle2)
+                          {
+                              spriteBatch2.DrawString(sf, "PRAWO", new Vector2(200, 800), Color.White);
+
+                          }
+                          else
+                          {
+                              spriteBatch2.DrawString(sf, "LEWO", new Vector2(200, 800), Color.White);
+
+                          }
+                      }
+                      else
+                          spriteBatch2.DrawString(sf, "KONIEC", new Vector2(200, 800), Color.White);
+                      */
+                      /*
+                      while (i4<wczytaneNum.Length-1 && !((angle2 < wczytaneNum[i4] && angle2 > wczytaneNum[i4 + 1]) || (angle2 > wczytaneNum[i4] && angle2 < wczytaneNum[i4 + 1])) )
+                      {
+                          i4++;
+
+                      }
+                      j4 = i4;
+                      while (j4<wczytaneNum.Length-1 && i4<wczytaneNum.Length && Math.Abs(wczytaneNum[i4] - wczytaneNum[j4]) < 20)
+                      {
+                          j4++;
+                      }
+                      if (j4<wczytaneNum.Length && i4<wczytaneNum.Length  && wczytaneNum[j4] <= wczytaneNum[i4])
+                      {
+                          spriteBatch2.DrawString(sf, "LEWO", new Vector2(200, 800), Color.White);
+                      
+                          //mamy chyba: bie¿¹ce po³o¿enie, wszystkiego, to narysowaæ r¹czkê gdzieœtam ;F
+                          //zaznaczaj_w_lewo (JAK? chyba kreska i kulka ;F)
+                      }
+                      else
+                      {
+                          spriteBatch2.DrawString(sf, "PRAWO", new Vector2(200, 800), Color.White);
+                      
+                          //zaznaczaj w prawo (JAK?)
+                      }
+                       */
+                  }
+                 spriteBatch2.End();
+
                 // ---------------------------- !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ------------------------------------------------
 
                 
