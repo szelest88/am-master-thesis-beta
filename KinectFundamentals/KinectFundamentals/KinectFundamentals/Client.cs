@@ -118,7 +118,17 @@ namespace KinectFundamentals
         {
             ASCIIEncoding encoder = new ASCIIEncoding();
             byte[] messageBuffer = encoder.GetBytes(message);
+            this.stream.Write(messageBuffer, 0, messageBuffer.Length);
+            this.stream.Flush();
+        }
 
+        public void SendMessageBS(BodyState message)
+        {
+            BinaryFormatter bf = new BinaryFormatter();
+            MemoryStream ms = new MemoryStream();
+            bf.Serialize(ms, message);
+            byte[] messageBuffer = ms.GetBuffer();
+                
             this.stream.Write(messageBuffer, 0, messageBuffer.Length);
             this.stream.Flush();
         }
