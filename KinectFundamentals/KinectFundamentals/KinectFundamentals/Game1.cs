@@ -715,6 +715,9 @@ namespace KinectFundamentals
 
                 int i4 = 0;
                 int j4 = 0;
+
+                bool globalLeft = false;
+                bool globalRight = false;
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.Green);
@@ -807,13 +810,7 @@ namespace KinectFundamentals
                 //drugi Kinect
                    BodyState bs3 = new BodyState(result);
 
-                   #region niewazne
-                   //Vector2 correctPositionElbow = positionFromJoint(new Vector2(bs3.elbowRight.X, bs3.elbowRight.Y));
-                   //float correctDepthElbow = bs3.elbowRight.Z;
-                   //Vector3 rightElbowNew = new Vector3(correctPositionElbow.X, correctPositionElbow.Y, correctDepthElbow);
-                   //Vector2 correctPositionArm = positionFromJoint(new Vector2(bs3.armRight.X, bs3.armRight.Y));
-                   #endregion niewazne
-
+                
 
                 // ---------------------------- !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ------------------------------------------------
                 
@@ -822,9 +819,6 @@ namespace KinectFundamentals
                 Vector3 rightHandNew = new Vector3(bs3.handRight.X, bs3.handRight.Y, correctDepthHand); //czy jest ok?
                 rightHandNew = TransformHelper.transformToFirstKinect(new Vector3(correctPositionHand,correctDepthHand));
                 
-                
-                // ---------------------------- !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ------------------------------------------------
-
                 correctPositionElbow = new Vector2(bs3.elbowRight.X, bs3.elbowRight.Y);
                 correctDepthElbow = bs3.elbowRight.Z;
                 rightElbowNew = new Vector3(bs3.elbowRight.X, bs3.elbowRight.Y, correctDepthElbow);
@@ -835,65 +829,57 @@ namespace KinectFundamentals
                 Vector3 rightArmNew = new Vector3(bs3.armRight.X, bs3.armRight.Y, correctDepthArm);
                 rightArmNew = TransformHelper.transformToFirstKinect(new Vector3(correctPositionArm, correctDepthArm));
 
-                renderLine(
-                    new Vector3(elbowRposition.X, elbowRposition.Y, elbowRdepth),
-                    new Vector3(handPosition.X, handPosition.Y, handDepth),
-                    view, projection, 1.0f, new Vector3(0, 0, 1), false);
+                ////wersja z poprawk¹
+                //float v1 = 0.3f; //nowy
+                //float v2 = 0.7f; //stary
+                //Vector3 elbowFinal = new Vector3(
+                //    (rightElbowNew.X*v1 + elbowRposition.X*v2) / (v1+v2),
+                //    (rightElbowNew.Y*v1 + elbowRposition.Y*v2) / (v1 + v2),
+                //    (rightElbowNew.Z*v1 + elbowRdepth*v2) / (v1 + v2));
+                //Vector3 rightHandFinal = new Vector3(
+                //    (rightHandNew.X*v1 + handPosition.X*v2) / (v1 + v2),
+                //    (rightHandNew.Y*v1 + handPosition.Y*v2) / (v1 + v2),
+                //    (rightHandNew.Z*v1 + handDepth*v2) / (v1 + v2));
+                //Vector3 armFinal = new Vector3(
+                //                    (rightArmNew.X*v1 + armRposition.X*v2) / (v1 + v2),
+                //                    (rightArmNew.Y*v1 + armRposition.Y*v2) / (v1 + v2),
+                //                    (rightArmNew.Z*v1 + armRdepth*v2) / (v1 + v2));
+                
+                //wersja bez poprawki
+                Vector3 elbowFinal = new Vector3(elbowRposition.X, elbowRposition.Y, elbowRdepth);
+                Vector3 rightHandFinal = new Vector3(handPosition.X, handPosition.Y,handDepth);
+                Vector3 armFinal = new Vector3(armRposition.X, armRposition.Y, armRdepth);
 
-                renderLine(
-                    new Vector3(elbowRposition.X, elbowRposition.Y, elbowRdepth),
-                    new Vector3(armRposition.X, armRposition.Y, armRdepth),
-                    view, projection, 1.0f, new Vector3(0, 0, 1), false);
 
+                #region niewazne
+                //renderLine(
+                //    new Vector3(elbowFinal.X, elbowFinal.Y, elbowFinal.Z),
+                //    new Vector3(rightHandFinal.X, rightHandFinal.Y, rightHandFinal.Z),
+                //    view, projection, 1.0f, new Vector3(0, 0, 1), false);
+
+                //renderLine(
+                //    new Vector3(elbowFinal.X, elbowFinal.Y, elbowFinal.Z),
+                //    new Vector3(armFinal.X, armFinal.Y, armFinal.Z),
+                //    view, projection, 1.0f, new Vector3(0, 0, 1), false);
+                #endregion niewazne
                 renderJoint(
                    new Vector2(
-                       (elbowRposition.X)
-                       , (elbowRposition.Y)
-                       ), (elbowRdepth), //rightHandNew.Z -> handDepth
+                       (elbowFinal.X)
+                       , (elbowFinal.Y)
+                       ), (elbowFinal.Z), //rightHandNew.Z -> handDepth
                    view, projection, 1.0f, new Vector3(1, 1, 1), false); // pi razy oko ok, ale ZA BARDZO ODSTAJE!!! 
                 renderJoint(
                new Vector2(
-                   (handPosition.X) 
-                   , (handPosition.Y) 
-                   ), (handDepth) , //rightHandNew.Z -> handDepth
+                   (rightHandFinal.X) 
+                   , (rightHandFinal.Y) 
+                   ), (rightHandFinal.Z) , //rightHandNew.Z -> handDepth
                view, projection, 1.0f, new Vector3(1, 1, 1), false); // pi razy oko ok, ale ZA BARDZO ODSTAJE!!! 
                 
-
-                //SPRAWDZIÆ ARGUMENTY DLA PONI¯SZYCH (...New)
-                //renderJoint(//tu nawala
-                //   new Vector2(
-                //       (rightArmNew.X + armRposition.X) / 2f
-                //       , (rightArmNew.Y + armRposition.Y) / 2f
-                //       ), (rightArmNew.Z + armRdepth) / 2f, //rightHandNew.Z -> handDepth
-                //   view, projection, 1.0f, new Vector3(1, 0, 0), false); // pi razy oko ok, ale ZA BARDZO ODSTAJE!!! 
-                //renderJoint(//tu te¿
-                //        new Vector2(
-                //            (rightElbowNew.X)
-                //            , (rightElbowNew.Y)
-                //            ), (rightElbowNew.Z) , //rightHandNew.Z -> handDepth
-                //        view, projection, 1.0f, new Vector3(0, 1, 0), false); // pi razy oko ok, ale ZA BARDZO ODSTAJE!!! 
-          
-
-                Vector3 elbowFinal = new Vector3(
-                    (rightElbowNew.X + elbowRposition.X) / 2f,
-                    (rightElbowNew.Y + elbowRposition.Y) / 2f,
-                    (rightElbowNew.Z + elbowRdepth) / 2f);
-                Vector3 rightHandFinal = new Vector3(
-                    (rightHandNew.X + handPosition.X) / 2f,         
-                    (rightHandNew.Y + handPosition.Y) / 2f,
-                    (rightHandNew.Z + handDepth) / 2f);
-                Vector3 armFinal = new Vector3(
-                                    (rightArmNew.X + armRposition.X) / 2f,
-                                    (rightArmNew.Y + armRposition.Y) / 2f,
-                                    (rightArmNew.Z + armRdepth) / 2f);
-
 
 
                   drawArc(
                       new Vector3(handPosition.X, handPosition.Y, handDepth),
-
                       new Vector3(elbowRposition.X, elbowRposition.Y, elbowRdepth),
-
                       new Vector3(armRposition.X, armRposition.Y, armRdepth));
 
                   Vector3 handP = new Vector3(handPosition.X, handPosition.Y, handDepth);//!!!!!!!!!!!!!!!!!!!!!!1
@@ -933,42 +919,76 @@ namespace KinectFundamentals
                       if (licznikod50do100 == 151)
                       {
                           wczytane = File.ReadAllLines(@"C:/saved.txt");
-                          for(int i=0;i<wczytane.Length;i++)
-                              wczytaneNum[i]=float.Parse(wczytane[i]);
-
+                          for (int i = 0; i < wczytane.Length; i++)
+                              wczytaneNum[i] = float.Parse(wczytane[i]);
+                          if (wczytaneNum.Last() < wczytaneNum[wczytaneNum.Length - 2])
+                              globalRight = true;
+                          else
+                              globalLeft = true;
                       }
+
+                      
+                          //current.najblizsze:
+                          float min = Math.Abs(angle - wczytaneNum[0]);
+                          float prev = min;
+                          float next = min;
+                          for (int i = 1; i < wczytane.Length - 1; i++)
+                          {
+                              if (Math.Abs(angle - wczytaneNum[i]) < min)
+                                  min = wczytaneNum[i];
+                              prev = wczytaneNum[i - 1];
+                              next = wczytaneNum[i + 1];
+                          }
+                          if (globalRight == true && min < prev)
+                          {
+                              globalRight = false;
+                              globalLeft = true;
+                          }
+
+                          if (globalLeft == true && next > min)
+                          {
+                              globalRight = true;
+                              globalLeft = false;
+                          }
                       
                   }
+                  spriteBatch2.DrawString(sf, "---->", new Vector2(600, 200), Color.White);
 
                   if (licznikod50do100 > 175)
                   {
-                      spriteBatch2.DrawString(sf, "TESTOWANE", new Vector2(200, 800), Color.White);
-                   
-                      //i4++;
+                      spriteBatch2.DrawString(sf, "---->", new Vector2(200,800), Color.White);
+
+
+                     //if(globalLeft)
+                     // spriteBatch2.DrawString(sf, "<-----", new Vector2(200, 800), Color.White);
+                      //else if(globalRight)
+                     //     spriteBatch2.DrawString(sf, "<-----", new Vector2(200, 800), Color.White);
+                      
+                          //i4++;
                       //drawArc(new Vector3(armRposition.X, armRposition.Y, armRdepth),
                      //     new Vector3(elbowRposition.X, elbowRposition.Y, elbowRdepth),
 
 
 
 
-                      /*
+                      
                       if (i4 < wczytaneNum.Length - 1)
                       {
                           i4++;
                           if (wczytaneNum[i4] > angle2)
                           {
-                              spriteBatch2.DrawString(sf, "PRAWO", new Vector2(200, 800), Color.White);
+                              spriteBatch2.DrawString(sf, "---->", new Vector2(200, 800), Color.White);
 
                           }
                           else
                           {
-                              spriteBatch2.DrawString(sf, "LEWO", new Vector2(200, 800), Color.White);
+                         //     spriteBatch2.DrawString(sf, "LEWO", new Vector2(200, 800), Color.White);
 
                           }
                       }
                       else
                           spriteBatch2.DrawString(sf, "KONIEC", new Vector2(200, 800), Color.White);
-                      */
+                      
                       /*
                       while (i4<wczytaneNum.Length-1 && !((angle2 < wczytaneNum[i4] && angle2 > wczytaneNum[i4 + 1]) || (angle2 > wczytaneNum[i4] && angle2 < wczytaneNum[i4 + 1])) )
                       {

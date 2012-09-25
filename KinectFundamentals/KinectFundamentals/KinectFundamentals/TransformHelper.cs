@@ -18,10 +18,11 @@ namespace KinectFundamentals
         **/
         public static Vector3 transformToFirstKinect(Vector3 remote)
         {
-            float l = 0.47f; //było 0.47
+            float l = 0.47f; //odległość w metrach pomiędzy kinectami w osi x (lewo-prawo)
 
-            float alfa = -MathHelper.ToRadians(18); // 18     !!! Pokminić nad tym. (było -1)
-            float poprz = -0.1f;
+            float alfa = -MathHelper.ToRadians(18); 
+            // kąt nachylenia wokół osi pionowej drugiego kinecta (względem pierwszego)
+            float back = -0.1f; // drugi kinect jest 10 cm z tyłu
             float sinAlfa = (float)Math.Sin(alfa); float cosAlfa = (float)Math.Cos(alfa);
             float tanAlfa = (float)Math.Tan(alfa); float cotAlpha = 1 / tanAlfa;
             float xbis = 0, zbis = 0;
@@ -30,7 +31,7 @@ namespace KinectFundamentals
           
             xbis = l - (z2 * sinAlfa - x2 * cosAlfa); // było l-(A1-B1) // (+ -)
             zbis = z2 / cosAlfa - x2 * sinAlfa; //  (+ -)
-            zbis += poprz; //trzeci parametr... // (modify)
+            zbis += back; //trzeci parametr... 
             return new Vector3(xbis, remote.Y, zbis);
         }
     }
