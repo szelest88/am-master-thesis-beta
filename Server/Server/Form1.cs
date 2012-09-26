@@ -57,11 +57,11 @@ namespace Server
             // Skeleton Stream
             kinectSensor.SkeletonStream.Enable(new TransformSmoothParameters()
             {
-                Smoothing = 0.4f, //0.5
-                Correction = 1.0f,
-                Prediction = 0.5f,
-                JitterRadius = 0.1f, //0.05f
-                MaxDeviationRadius = 0.04f
+                Smoothing = 0.4f,//0.4
+                Correction = 1.0f, //1.0
+                Prediction = 0.0f, //0.1
+                JitterRadius = 0.1f, //0.1
+                MaxDeviationRadius = 0.2f//0.2
             });
             kinectSensor.SkeletonFrameReady += new EventHandler<SkeletonFrameReadyEventArgs>(kinectSensor_SkeletonFrameReady);
 
@@ -152,7 +152,7 @@ namespace Server
         //nadawacz
         private Server server;
 
-        void DisplayMetodReceived(string message)
+        void DataReceived(string message)
         {
             this.Text = message;
         }

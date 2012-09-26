@@ -8,6 +8,7 @@ using Microsoft.Kinect;
 
 namespace Server
 {
+    [Serializable]
     class BodyState
     {
 

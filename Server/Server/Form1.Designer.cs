@@ -35,9 +35,9 @@
             // 
             // button2
             // 
-            this.button2.Location = new System.Drawing.Point(113, 116);
+            this.button2.Location = new System.Drawing.Point(48, 97);
             this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(58, 23);
+            this.button2.Size = new System.Drawing.Size(185, 153);
             this.button2.TabIndex = 1;
             this.button2.Text = "Exit";
             this.button2.UseVisualStyleBackColor = true;
@@ -46,7 +46,6 @@
             // timer1
             // 
             this.timer1.Enabled = true;
-            this.timer1.Interval = 50;
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
             // Form1
@@ -56,7 +55,7 @@
             this.ClientSize = new System.Drawing.Size(284, 262);
             this.Controls.Add(this.button2);
             this.Name = "Form1";
-            this.Text = "Form1";
+            this.Text = "Server";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.Load += new System.EventHandler(this.Form1_Load);
             this.ResumeLayout(false);

@@ -31,13 +31,13 @@ namespace Server
         public const uint DUPLEX = (0x00000003);
         public const uint FILE_FLAG_OVERLAPPED = (0x40000000);
 
-        public class Client
+        public class ClientForServer
         {
             public SafeFileHandle handle;
             public FileStream stream;
         }
 
-        public delegate void MessageReceivedHandler(Client client, string message);
+        public delegate void MessageReceivedHandler(ClientForServer client, string message);
 
         public event MessageReceivedHandler MessageReceived;
         public const int BUFFER_SIZE = 4096;
@@ -45,7 +45,7 @@ namespace Server
         string pipeName;
         public Thread listenThread;
         bool running;
-        List<Client> clients;
+        List<ClientForServer> clients;
         public Thread readThread;
 
         public string PipeName
@@ -61,7 +61,7 @@ namespace Server
 
         public Server()
         {
-            this.clients = new List<Client>();
+            this.clients = new List<ClientForServer>();
         }
 
         private void ListenForClients()
@@ -86,7 +86,7 @@ namespace Server
                 if (success == 0)
                     return;
 
-                Client client = new Client();
+                ClientForServer client = new ClientForServer();
                 client.handle = clientHandle;
 
                 lock (clients)
@@ -108,7 +108,7 @@ namespace Server
 
         private void Read(object clientObj)
         {
-            Client client = (Client)clientObj;
+            ClientForServer client = (ClientForServer)clientObj;
             client.stream = new FileStream(client.handle, FileAccess.ReadWrite, BUFFER_SIZE, true);
             byte[] buffer = new byte[BUFFER_SIZE];
             ASCIIEncoding encoder = new ASCIIEncoding();
@@ -145,7 +145,7 @@ namespace Server
             {
                 ASCIIEncoding encoder = new ASCIIEncoding();
                 byte[] messageBuffer = encoder.GetBytes(message);
-                foreach (Client client in this.clients)
+                foreach (ClientForServer client in this.clients)
                 {
                     client.stream.Write(messageBuffer, 0, messageBuffer.Length);
                     client.stream.Flush();
