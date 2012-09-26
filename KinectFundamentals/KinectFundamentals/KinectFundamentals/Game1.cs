@@ -49,6 +49,7 @@ namespace KinectFundamentals
         Model mdBox;
 
         Model mdArrow;
+        Model mdlArrow;
         // Effect effect;
 
         ///////// secondary kinect
@@ -402,6 +403,7 @@ namespace KinectFundamentals
             cursor = Content.Load<Texture2D>("cursor");
             play = Content.Load<Texture2D>("play");
             mdArrow = LoadModel("arrow2");
+            mdlArrow = LoadModel("lArrow");
 
             rec = Content.Load<Texture2D>("rec");
             
@@ -482,20 +484,42 @@ namespace KinectFundamentals
                 mesh.Draw();
             }
         }
-        void renderJoint(Vector2 which, float depth, Matrix view, Matrix projection, float scale, Vector3 color, bool alpha)
+        void renderJoint(Vector2 which, float depth, Matrix view, Matrix projection, float scale, Vector3 color, bool alpha, bool hand, bool ok, bool left)
         { //niby to jest ok.
+            Vector3 color2 = new Vector3(0.4f,0.4f,0.4f);
+            Matrix rotMat = Matrix.CreateRotationX(0); ;// Matrix.CreateRotationX((float)(Math.PI / 2.0));
 
+            Model md;
+            if(hand ==false){
+                md = mdRH;
+            }
+            if(hand==true && ok==true){
+            { 
+                md = mdRH;
+            }
+                if(hand ==true && ok==false)
+                {
+                    md=mdArrow;
+                    if(left){
+                    //    md=mdArrow;
+                        rotMat = Matrix.CreateRotationX((float)(-Math.PI / 2.0));
+                    }else
+                        rotMat = Matrix.CreateRotationX((float)(Math.PI / 2.0));
+
+                }
+            }
            // depth *= 100;
          //   scale *= 2;
-    
-            foreach (ModelMesh mesh in mdRH.Meshes)
+            //Matrix rot = new Matrix();
+            //if(
+            foreach (ModelMesh mesh in mdlArrow.Meshes) //mdRH
             {
                 //This is where the mesh orientation is set
                 foreach (BasicEffect effect in mesh.Effects) //próba BE -> E
                 {
                     //effect.CurrentTechnique //AM
                     effect.EnableDefaultLighting();
-                    effect.AmbientLightColor = new Vector3(0.4f, 0.4f, 0.4f);
+                    effect.AmbientLightColor = color2;
 
 
                   //  if (blue)
@@ -511,8 +535,8 @@ namespace KinectFundamentals
                     effect.Projection = projection;
                     effect.World = modelAbsTrans[0]
                         *
-                        Matrix.CreateScale(20) 
-
+                        Matrix.CreateScale(40) //!
+                        * rotMat//- prawo, + lewo
                         * Matrix.CreateTranslation(
                         //by³o depth*=100
                         -1*depth*2000, //to (*100) daje bardzo ³adne wyniki dla 1 m... niby wszystkie w metrach, ale coœ nie bangla chyba
@@ -523,7 +547,7 @@ namespace KinectFundamentals
               //      320.0f - which.Y*2.0f,
               //          480.0f + -which.X*4.0f)//240.0-w.X*4
                         //  *
-                       *Matrix.CreateScale(1.0f/(20)) 
+                       *Matrix.CreateScale(1.0f/(40)) //!
                         ;
                   //  System.Console.WriteLine(depth); //depth jest w m (depth * 100 w cm)
                 }
@@ -532,7 +556,56 @@ namespace KinectFundamentals
                 mesh.Draw();
             }
         }
+        void renderSphere(Vector2 which, float depth, Matrix view, Matrix projection, float scale, Vector3 color, bool alpha)
+        { //niby to jest ok.
 
+            // depth *= 100;
+            //   scale *= 2;
+
+            foreach (ModelMesh mesh in mdRH.Meshes) //mdRH
+            {
+                //This is where the mesh orientation is set
+                foreach (BasicEffect effect in mesh.Effects) //próba BE -> E
+                {
+                    //effect.CurrentTechnique //AM
+                    effect.EnableDefaultLighting();
+                    effect.AmbientLightColor = new Vector3(0.4f, 0.4f, 0.4f);
+
+
+                    //  if (blue)
+
+                    effect.DiffuseColor = color;
+                    if (alpha)
+                        effect.Alpha = 0.3f;
+                    //else
+                    //   effect.DiffuseColor = new Vector3(1, 0, 0);
+
+
+                    effect.View = view;
+                    effect.Projection = projection;
+                    effect.World = modelAbsTrans[0]
+                        *
+                        Matrix.CreateScale(20)
+
+                        * Matrix.CreateTranslation(
+                        //by³o depth*=100
+                        -1 * depth * 2000, //to (*100) daje bardzo ³adne wyniki dla 1 m... niby wszystkie w metrach, ale coœ nie bangla chyba
+                     -1 * which.Y * 2000,//1*which.Y*400.0f, //100-Y*2.5
+                     -1 * which.X * 2000.0f //120-X*2.5
+                        //centrum ekranu to 0,0
+                     )
+                        //      320.0f - which.Y*2.0f,
+                        //          480.0f + -which.X*4.0f)//240.0-w.X*4
+                        //  *
+                       * Matrix.CreateScale(1.0f / (20))
+                        ;
+                    //  System.Console.WriteLine(depth); //depth jest w m (depth * 100 w cm)
+                }
+
+                //Draw the mesh, will use the effects set above.
+                mesh.Draw();
+            }
+        }
 
         void renderLine(Vector3 nr1, Vector3 nr2, Matrix view, Matrix projection, float scale, Vector3 color, bool alpha)
         {
@@ -600,7 +673,7 @@ namespace KinectFundamentals
             //  renderLine(j, j+prostopadly,
             Vector3 nor = (j1 - j) / 2f;
             nor.Normalize();
-            for (int i = 0; i < (int)n; i++)
+            for (int i = 0; i < (int)n; i+=2)
             {
                 Vector3 srodek = Vector3.Transform(j + nor / 4.0f,
                     //wybrano j1, ale mo¿e byæ sta³a odleg³oœæ
@@ -608,7 +681,7 @@ namespace KinectFundamentals
                     Matrix.CreateFromAxisAngle(prostopadly, -i / n * kat) *
                     Matrix.CreateTranslation(j)
                     );
-                renderJoint(new Vector2(srodek.X, srodek.Y), srodek.Z, view, projection,
+                renderSphere(new Vector2(srodek.X, srodek.Y), srodek.Z, view, projection,
                     1f, new Vector3(0, 0, 1), false);
             }
         }
@@ -707,10 +780,10 @@ namespace KinectFundamentals
                 bool playDown = false;
 
 
-                int licznikod50do100 = 0;
-                string[] linie = new string[100];
-                string[] wczytane = new string[100];
-                float[] wczytaneNum = new float[100];
+                int licznikod50do250 = 0;
+                string[] linie = new string[200];
+                string[] wczytane = new string[200];
+                float[] wczytaneNum = new float[200];
 
 
                 int i4 = 0;
@@ -862,20 +935,13 @@ namespace KinectFundamentals
                 //    new Vector3(armFinal.X, armFinal.Y, armFinal.Z),
                 //    view, projection, 1.0f, new Vector3(0, 0, 1), false);
                 #endregion niewazne
-                renderJoint(
+                renderSphere(
                    new Vector2(
                        (elbowFinal.X)
                        , (elbowFinal.Y)
                        ), (elbowFinal.Z), //rightHandNew.Z -> handDepth
                    view, projection, 1.0f, new Vector3(1, 1, 1), false); // pi razy oko ok, ale ZA BARDZO ODSTAJE!!! 
-                renderJoint(
-               new Vector2(
-                   (rightHandFinal.X) 
-                   , (rightHandFinal.Y) 
-                   ), (rightHandFinal.Z) , //rightHandNew.Z -> handDepth
-               view, projection, 1.0f, new Vector3(1, 1, 1), false); // pi razy oko ok, ale ZA BARDZO ODSTAJE!!! 
                 
-
 
                   drawArc(
                       new Vector3(handPosition.X, handPosition.Y, handDepth),
@@ -897,26 +963,28 @@ namespace KinectFundamentals
                 string str = "Angle: "+angle2;
                 
                 if (!str.Contains(char.ConvertFromUtf32(0x0105)))
-                  spriteBatch2.DrawString(sf, str, new Vector2(200, 700), Color.White);
+                  spriteBatch2.DrawString(sf, str, new Vector2(200, 00), Color.White);
                  
-                  licznikod50do100++;
-                  if (150 > licznikod50do100 && licznikod50do100 >= 50)
+                  licznikod50do250++;
+                  if (250 > licznikod50do250 && licznikod50do250 >= 50)
                   {
-                      linie[licznikod50do100 - 50] = ""+angle2;
+                      spriteBatch2.DrawString(sf, "Nagrywanie!", new Vector2(200, 700), Color.White);
+                    
+                      linie[licznikod50do250 - 50] = ""+angle2;
                   }
-                  if (licznikod50do100 == 150)
+                  if (licznikod50do250 == 250)
                   {
-                      spriteBatch2.DrawString(sf,"ZAPISANO",new Vector2(200,700),Color.White);
-                      StreamWriter sw = File.CreateText(@"C:/saved.txt");
-                      for (int i = 0; i < 100; i++)
-                          sw.WriteLine("" + linie[i]);
-                      sw.Close();
+                      spriteBatch2.DrawString(sf, "ZAPISANO (wylaczone dla celow testowych)", new Vector2(200, 700), Color.White);
+                      //StreamWriter sw = File.CreateText(@"C:/saved.txt");
+                //      for (int i = 0; i < 200; i++)
+                //          sw.WriteLine("" + linie[i]);
+                      //sw.Close();
                   }
-
-                  if (licznikod50do100 > 150 && licznikod50do100 < 175)
+                  int przes = 0;
+                  if (licznikod50do250 > 250+przes && licznikod50do250 < 275+przes)
                   {
                       spriteBatch2.DrawString(sf, "WCZYTYWANIE.", new Vector2(200, 800), Color.White);
-                      if (licznikod50do100 == 151)
+                      if (licznikod50do250 == 251+przes)
                       {
                           wczytane = File.ReadAllLines(@"C:/saved.txt");
                           for (int i = 0; i < wczytane.Length; i++)
@@ -952,42 +1020,62 @@ namespace KinectFundamentals
                           }
                       
                   }
-                  spriteBatch2.DrawString(sf, "---->", new Vector2(600, 200), Color.White);
+                //  spriteBatch2.DrawString(sf, "---->", new Vector2(600, 200), Color.White);
 
-                  if (licznikod50do100 > 175)
+                  if (licznikod50do250 > 275)
                   {
-                      spriteBatch2.DrawString(sf, "---->", new Vector2(200,800), Color.White);
+              //        spriteBatch2.DrawString(sf, "---->", new Vector2(200,800), Color.White);
 
-
-                     //if(globalLeft)
-                     // spriteBatch2.DrawString(sf, "<-----", new Vector2(200, 800), Color.White);
-                      //else if(globalRight)
-                     //     spriteBatch2.DrawString(sf, "<-----", new Vector2(200, 800), Color.White);
-                      
-                          //i4++;
-                      //drawArc(new Vector3(armRposition.X, armRposition.Y, armRdepth),
-                     //     new Vector3(elbowRposition.X, elbowRposition.Y, elbowRdepth),
-
-
-
-
-                      
+                                            
                       if (i4 < wczytaneNum.Length - 1)
                       {
                           i4++;
-                          if (wczytaneNum[i4] > angle2)
+
+                          spriteBatch2.DrawString(sf, "Odczyt: " + wczytaneNum[i4], new Vector2(200, 600), Color.White);
+
+                          if (wczytaneNum[i4] > angle2 && Math.Abs(wczytaneNum[i4]-angle2)>10)
                           {
-                              spriteBatch2.DrawString(sf, "---->", new Vector2(200, 800), Color.White);
+                              spriteBatch2.DrawString(sf, "PRAWO", new Vector2(200, 800), Color.White);
+                              renderJoint(
+               new Vector2(
+                   (rightHandFinal.X)
+                   , (rightHandFinal.Y)
+                   ), (rightHandFinal.Z), //rightHandNew.Z -> handDepth
+               view, projection, 1.0f, new Vector3(1, 1, 1), 
+               false, true,false,false); // pi razy oko ok, ale ZA BARDZO ODSTAJE!!! 
+                
+
+                          }
+                          else if (wczytaneNum[i4] < angle2 && Math.Abs(wczytaneNum[i4] - angle2) > 10)
+                          {
+                              renderJoint(
+new Vector2(
+(rightHandFinal.X)
+, (rightHandFinal.Y)
+), (rightHandFinal.Z), //rightHandNew.Z -> handDepth
+view, projection, 1.0f, new Vector3(1, 1, 1),
+false, true, false, true); // pi razy oko ok, ale ZA BARDZO ODSTAJE!!! 
+
+
+                              spriteBatch2.DrawString(sf, "LEWO", new Vector2(200, 800), Color.White);
 
                           }
                           else
                           {
-                         //     spriteBatch2.DrawString(sf, "LEWO", new Vector2(200, 800), Color.White);
+                          //    spriteBatch2.DrawString(sf, "PRAWIDLOWO", new Vector2(200, 800), Color.White);
+                              renderJoint(
+new Vector2(
+(rightHandFinal.X)
+, (rightHandFinal.Y)
+), (rightHandFinal.Z), //rightHandNew.Z -> handDepth
+view, projection, 1.0f, new Vector3(1, 1, 1),
+false, true, true, false); // pi razy oko ok, ale ZA BARDZO ODSTAJE!!! 
+                
 
                           }
                       }
-                      else
-                          spriteBatch2.DrawString(sf, "KONIEC", new Vector2(200, 800), Color.White);
+                     // else
+                     //     spriteBatch2.DrawString(sf, ""+wczytane[i4], new Vector2(200, 800), Color.White);
                       
                       /*
                       while (i4<wczytaneNum.Length-1 && !((angle2 < wczytaneNum[i4] && angle2 > wczytaneNum[i4 + 1]) || (angle2 > wczytaneNum[i4] && angle2 < wczytaneNum[i4 + 1])) )
