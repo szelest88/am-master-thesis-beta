@@ -68,58 +68,46 @@ namespace KinectFundamentals
             if (this.handle.IsInvalid)
                 return;
 
-            this.connected = true;
+            connected = true;
 
-            this.readThread = new Thread(new ThreadStart(Read));
-            this.readThread.Start();
+            readThread = new Thread(new ThreadStart(Read));
+            readThread.Start();
         }
 
         public void Read()
         {
-            this.stream = new FileStream(this.handle, FileAccess.ReadWrite, BUFFER_SIZE, true);
-            byte[] readBuffer = new byte[BUFFER_SIZE];
-            ASCIIEncoding encoder = new ASCIIEncoding();
+            stream = new FileStream(handle, FileAccess.ReadWrite, BUFFER_SIZE, true);
+            byte[] readBuf = new byte[BUFFER_SIZE];
+            ASCIIEncoding e = new ASCIIEncoding();
             while (true)
             {
                 int bytesRead = 0;
 
                 try
                 {
-                    bytesRead = this.stream.Read(readBuffer, 0, BUFFER_SIZE);
+                    bytesRead = stream.Read(readBuf, 0, BUFFER_SIZE);
                 }
                 catch
-                {
-                    break;
-                }
+                {break;}
 
                 if (bytesRead == 0)
                     break;
 
-                if (this.MessageReceived != null)
-                    this.MessageReceived(encoder.GetString(readBuffer, 0, bytesRead));
-                //                if (this.MessageReceived != null)
-                //                {
-                //                      MemoryStream memStream = new MemoryStream();
-                //BinaryFormatter binForm = new BinaryFormatter();
-                //memStream.Write(readBuffer, 0, readBuffer.Length);
-                //memStream.Seek(0, SeekOrigin.Begin);
-                //Object obj = (Object) binForm.Deserialize(memStream);
+                if (MessageReceived != null)
+                    MessageReceived(e.GetString(readBuf, 0, bytesRead));
 
-                //BodyState bs = (BodyState)obj;
-                //                  //  this.MessageReceived(encoder.GetString(readBuffer, 0, bytesRead));
-                //                }
             }
 
-            this.stream.Close();
-            this.handle.Close();
+            stream.Close();
+            handle.Close();
         }
 
         public void SendMessage(string message)
         {
-            ASCIIEncoding encoder = new ASCIIEncoding();
-            byte[] messageBuffer = encoder.GetBytes(message);
-            this.stream.Write(messageBuffer, 0, messageBuffer.Length);
-            this.stream.Flush();
+            ASCIIEncoding e = new ASCIIEncoding();
+            byte[] buf = e.GetBytes(message);
+            stream.Write(buf, 0, buf.Length);
+            stream.Flush();
         }
 
         public void SendMessageBS(BodyState message)
@@ -127,9 +115,9 @@ namespace KinectFundamentals
             BinaryFormatter bf = new BinaryFormatter();
             MemoryStream ms = new MemoryStream();
             bf.Serialize(ms, message);
-            byte[] messageBuffer = ms.GetBuffer();
+            byte[] messageBuf = ms.GetBuffer();
                 
-            this.stream.Write(messageBuffer, 0, messageBuffer.Length);
+            this.stream.Write(messageBuf, 0, messageBuf.Length);
             this.stream.Flush();
         }
     }
