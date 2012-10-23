@@ -52,7 +52,6 @@ namespace KinectFundamentals
         Model mdlArrow;
         // Effect effect;
 
-        ///////// secondary kinect
       //  string pos = "";
         string result = "";
 
@@ -105,7 +104,7 @@ namespace KinectFundamentals
 
         }
 
-        private void SetupVertices(int verts)
+        private void SetVert(int verts)
         {
             vertices = new VertexPositionColor[verts * 2];
         }
@@ -261,7 +260,7 @@ namespace KinectFundamentals
             }
         }
 
-        byte[] pixelsFromFrame = new byte[1228800];//   byte[] pixelsFromFrame = new byte[colorImageFrame.PixelDataLength];
+        byte[] pixelsFromFrame = new byte[1228800];// colorImageFrame.PixelDataLength;
 
         int h2 = 960;
         int w2 = 1280;
@@ -271,44 +270,32 @@ namespace KinectFundamentals
             {
                 if (colorImageFrame != null)
                 {
-
-
                     colorImageFrame.CopyPixelDataTo(pixelsFromFrame);
 
-                    //utworzyæ sobie zmienne na height*2 i width*2
+                    //zmienne na height*2 i width*2
                     
 
                     Color[] color = new Color[h2 * w2];//bez *4
                     kinectRGBVideo = new Texture2D(graphics.GraphicsDevice, w2, h2);//bez *2*2
 
-                    // Go through each pixel and set the bytes correctly
-                    // Remember, each pixel got a Rad, Green and Blue
-                    int index = 0;
+                     int index = 0;
 
                     for (int y = 0; y < h2; y += 2)
                     {
                         int yw2 = y * w2;
                         for (int x = 0; x < w2; x += 2)
                         {
-                            //int y2 = y * 2;
-                            //int x2 = x * 2;
-
-
+                      
                             int yw2x = yw2 + x;
                             color[yw2x + w2] =
                                 color[yw2x + 1] =
                                     color[yw2x] =
                                         color[yw2x + w2 + 1] =
                                             new Color(pixelsFromFrame[index + 2], pixelsFromFrame[index + 1], pixelsFromFrame[index + 0]);
-
-                            //        color[yw2x];
-                            //        color[yw2x];
-                            //       color[yw2x + w2 + 1] = color[yw2x];
-                            index += 4;
+                           index += 4;
                         }
                     }
 
-                    // Set pixeldata from the ColorImageFrame to a Texture2D
                     kinectRGBVideo.SetData(color);
                 }
             }
@@ -323,7 +310,6 @@ namespace KinectFundamentals
                 {
                     if (sensor.Status == KinectStatus.Connected)
                     {
-                        // Found one, set our sensor to this
                         kinectSensor = sensor;
                         break;
                     }
@@ -333,37 +319,8 @@ namespace KinectFundamentals
 
             if (this.kinectSensor == null)
             {
-                //connectedStatus = "Found none Kinect Sensors connected to USB";
                 return;
             }
-            /*
-            // You can use the kinectSensor.Status to check for status
-            // and give the user some kind of feedback
-            switch (kinectSensor.Status)
-            {
-                case KinectStatus.Connected:
-                    {
-                    //    connectedStatus = "Status: Connected";
-                        break;
-                    }
-                case KinectStatus.Disconnected:
-                    {
-                      //  connectedStatus = "Status: Disconnected";
-                        break;
-                    }
-                case KinectStatus.NotPowered:
-                    {
-                        //connectedStatus = "Status: Connect the power";
-                        break;
-                    }
-                default:
-                    {
-                 //       connectedStatus = "Status: Error";
-                        break;
-                    }
-            }
-            */
-            // Init the found and connected device
             if (kinectSensor.Status == KinectStatus.Connected)
             {
                 InitializeKinect();
@@ -420,7 +377,7 @@ namespace KinectFundamentals
             //k¹ty
             //trójk¹ty
             effect2 = Content.Load<Effect>("Effect1");
-            SetupVertices(angle);
+            SetVert(angle);
         }
 
         protected override void UnloadContent()
@@ -457,7 +414,6 @@ namespace KinectFundamentals
 
             foreach (ModelMesh mesh in mdArrow.Meshes)
             {
-                //This is where the mesh orientation is set
                 foreach (BasicEffect effect in mesh.Effects) //próba BE -> E
                 {
 
@@ -485,58 +441,56 @@ namespace KinectFundamentals
             }
         }
         void renderJoint(Vector2 which, float depth, Matrix view, Matrix projection, float scale, Vector3 color, bool alpha, bool hand, bool ok, bool left)
-        { //niby to jest ok.
+        { 
             Vector3 color2 = new Vector3(0.4f,0.4f,0.4f);
-            Matrix rotMat = Matrix.CreateRotationX(0); ;// Matrix.CreateRotationX((float)(Math.PI / 2.0));
-
+            Matrix rotMat = Matrix.Identity;// Matrix.CreateRotationX(0); ;// Matrix.CreateRotationX((float)(Math.PI / 2.0));
+            Matrix createScale = Matrix.CreateScale(40);
             Model md;
-            if(hand ==false){
+           //if(hand ==false){
                 md = mdRH;
-            }
-            if(hand==true && ok==true){
-            { 
-                md = mdRH;
-            }
-                if(hand ==true && ok==false)
+           // }
+           // if(hand==true && ok==true){
+           // { 
+           //     md = mdRH;
+           // }
+            md = mdArrow;
+           
+              //  if(hand ==true && ok==false)
                 {
-                    md=mdArrow;
-                    if(left){
-                    //    md=mdArrow;
-                        rotMat = Matrix.CreateRotationX((float)(-Math.PI / 2.0));
-                    }else
-                        rotMat = Matrix.CreateRotationX((float)(Math.PI / 2.0));
+                    if (left)
+                    {
+                        //    md=mdArrow;
+                        createScale = Matrix.CreateScale(40);
+                        rotMat = Matrix.CreateRotationX((float)(Math.PI / 2.0)); /// ????????
+                 
+                    }
+                    else
+                    {
 
+                        createScale = Matrix.CreateScale(40);
+                        rotMat = Matrix.CreateRotationX((float)(-Math.PI / 2.0)); /// ????????
+                   
+                    }
                 }
-            }
-           // depth *= 100;
-         //   scale *= 2;
-            //Matrix rot = new Matrix();
-            //if(
-            foreach (ModelMesh mesh in mdlArrow.Meshes) //mdRH
+        //    }
+        foreach (ModelMesh mesh in mdlArrow.Meshes) //mdRH
             {
-                //This is where the mesh orientation is set
                 foreach (BasicEffect effect in mesh.Effects) //próba BE -> E
                 {
                     //effect.CurrentTechnique //AM
                     effect.EnableDefaultLighting();
-                    effect.AmbientLightColor = color2;
-
-
-                  //  if (blue)
+                    effect.AmbientLightColor = new Vector3(1,0,0);
 
                         effect.DiffuseColor = color;
-                        if (alpha)
-                            effect.Alpha = 0.3f;
-                    //else
-                     //   effect.DiffuseColor = new Vector3(1, 0, 0);
-                    
+                        //if (alpha)
+                        //    effect.Alpha = 0.3f;
                     
                     effect.View = view;
                     effect.Projection = projection;
-                    effect.World = modelAbsTrans[0]
-                        *
-                        Matrix.CreateScale(40) //!
+                    effect.World = modelAbsTrans[0]*
+                        createScale //!
                         * rotMat//- prawo, + lewo
+              
                         * Matrix.CreateTranslation(
                         //by³o depth*=100
                         -1*depth*2000, //to (*100) daje bardzo ³adne wyniki dla 1 m... niby wszystkie w metrach, ale coœ nie bangla chyba
@@ -544,6 +498,7 @@ namespace KinectFundamentals
                      -1*which.X * 2000.0f //120-X*2.5
                      //centrum ekranu to 0,0
                      )
+                     
               //      320.0f - which.Y*2.0f,
               //          480.0f + -which.X*4.0f)//240.0-w.X*4
                         //  *
@@ -602,7 +557,6 @@ namespace KinectFundamentals
                     //  System.Console.WriteLine(depth); //depth jest w m (depth * 100 w cm)
                 }
 
-                //Draw the mesh, will use the effects set above.
                 mesh.Draw();
             }
         }
@@ -619,7 +573,6 @@ namespace KinectFundamentals
 
             foreach (ModelMesh mesh in mdBox.Meshes)
             {
-                //This is where the mesh orientation is set
                 foreach (BasicEffect effect in mesh.Effects) //próba BE -> E
                 {
 
@@ -650,7 +603,6 @@ namespace KinectFundamentals
                         ;
                 }
 
-                //Draw the mesh, will use the effects set above.
                 mesh.Draw();
             }
         }
@@ -729,7 +681,11 @@ namespace KinectFundamentals
         }
 
         int i = -1;
-        bool nagrywanie = true;
+        bool nagrywanie = false;
+        bool odtwarzanie = false;
+        int ilosc_max = 200;
+        int licznik_nagrywanie = 0;
+        int licznik_odtwarzanie = 0;
         //bool pureView = true;
 
         //void render(Vector2 jointPosFromState, float jointDepthFromState, Vector2 jointPos, float jointDepth,
@@ -791,6 +747,7 @@ namespace KinectFundamentals
 
                 bool globalLeft = false;
                 bool globalRight = false;
+                bool flagOd = false;
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.Green);
@@ -831,12 +788,19 @@ namespace KinectFundamentals
             {
                 recDown = true;
                 playDown = false;
+                if (odtwarzanie == false)
+                {
+                    nagrywanie = true;
+                    odtwarzanie = false;
+                }
             }
             if (Math.Abs((int)(640 + (hand2Position.X) * 640 * 2) - 600) < 30 &&
                 Math.Abs((int)(480 + (hand2Position.Y) * 480 * 2) - 200) < 30)
             {
                 recDown = false;
                 playDown = true;
+                nagrywanie = false;
+                odtwarzanie = true;
             }
             if (recDown == true)
                 initialTopRec = 600;
@@ -846,6 +810,7 @@ namespace KinectFundamentals
                 initialTopPlay = 600;
             else
                 initialTopPlay = 200;
+            /*
             //System.Console.WriteLine(handPosition.Y);
             //if (ok == true)
             //{
@@ -871,6 +836,7 @@ namespace KinectFundamentals
             //            );
             //    }
             //}
+             */
             #endregion controlSprites
             spriteBatch.End();
             
@@ -902,25 +868,25 @@ namespace KinectFundamentals
                 Vector3 rightArmNew = new Vector3(bs3.armRight.X, bs3.armRight.Y, correctDepthArm);
                 rightArmNew = TransformHelper.transformToFirstKinect(new Vector3(correctPositionArm, correctDepthArm));
 
-                ////wersja z poprawk¹
-                //float v1 = 0.3f; //nowy
-                //float v2 = 0.7f; //stary
+                //wersja z poprawk¹
+                float v1 = 0.3f; //nowy
+                float v2 = 0.7f; //stary
                 //Vector3 elbowFinal = new Vector3(
-                //    (rightElbowNew.X*v1 + elbowRposition.X*v2) / (v1+v2),
-                //    (rightElbowNew.Y*v1 + elbowRposition.Y*v2) / (v1 + v2),
-                //    (rightElbowNew.Z*v1 + elbowRdepth*v2) / (v1 + v2));
+                //    (rightElbowNew.X * v1 + elbowRposition.X * v2) / (v1 + v2),
+                //    (rightElbowNew.Y * v1 + elbowRposition.Y * v2) / (v1 + v2),
+                //    (rightElbowNew.Z * v1 + elbowRdepth * v2) / (v1 + v2));
                 //Vector3 rightHandFinal = new Vector3(
-                //    (rightHandNew.X*v1 + handPosition.X*v2) / (v1 + v2),
-                //    (rightHandNew.Y*v1 + handPosition.Y*v2) / (v1 + v2),
-                //    (rightHandNew.Z*v1 + handDepth*v2) / (v1 + v2));
+                //    (rightHandNew.X * v1 + handPosition.X * v2) / (v1 + v2),
+                //    (rightHandNew.Y * v1 + handPosition.Y * v2) / (v1 + v2),
+                //    (rightHandNew.Z * v1 + handDepth * v2) / (v1 + v2));
                 //Vector3 armFinal = new Vector3(
-                //                    (rightArmNew.X*v1 + armRposition.X*v2) / (v1 + v2),
-                //                    (rightArmNew.Y*v1 + armRposition.Y*v2) / (v1 + v2),
-                //                    (rightArmNew.Z*v1 + armRdepth*v2) / (v1 + v2));
-                
+                //                    (rightArmNew.X * v1 + armRposition.X * v2) / (v1 + v2),
+                //                    (rightArmNew.Y * v1 + armRposition.Y * v2) / (v1 + v2),
+                //                    (rightArmNew.Z * v1 + armRdepth * v2) / (v1 + v2));
+
                 //wersja bez poprawki
                 Vector3 elbowFinal = new Vector3(elbowRposition.X, elbowRposition.Y, elbowRdepth);
-                Vector3 rightHandFinal = new Vector3(handPosition.X, handPosition.Y,handDepth);
+                Vector3 rightHandFinal = new Vector3(handPosition.X, handPosition.Y, handDepth);
                 Vector3 armFinal = new Vector3(armRposition.X, armRposition.Y, armRdepth);
 
 
@@ -948,9 +914,9 @@ namespace KinectFundamentals
                       new Vector3(elbowRposition.X, elbowRposition.Y, elbowRdepth),
                       new Vector3(armRposition.X, armRposition.Y, armRdepth));
 
-                  Vector3 handP = new Vector3(handPosition.X, handPosition.Y, handDepth);//!!!!!!!!!!!!!!!!!!!!!!1
-                  Vector3 elbowP = new Vector3(elbowRposition.X, elbowRposition.Y, elbowRdepth);//!!!!!!!!!!!!!!!!!!!!!!1
-                  Vector3 armP = new Vector3(armRposition.X, armRposition.Y, armRdepth);//!!!!!!!!!!!!!!!!!!!!!!1
+                  Vector3 handP = new Vector3(handPosition.X, handPosition.Y, handDepth);
+                  Vector3 elbowP = new Vector3(elbowRposition.X, elbowRposition.Y, elbowRdepth);
+                  Vector3 armP = new Vector3(armRposition.X, armRposition.Y, armRdepth);
                   Vector3 toHand2 = -elbowP + handP;
                   Vector3 toArm2 = -elbowP + armP;
                   float resTemp = 0;
@@ -965,8 +931,106 @@ namespace KinectFundamentals
                 if (!str.Contains(char.ConvertFromUtf32(0x0105)))
                   spriteBatch2.DrawString(sf, str, new Vector2(200, 00), Color.White);
                  
+                //////////////////////////////////////////
+
+                if(nagrywanie==true && licznik_nagrywanie<ilosc_max)
+	{
+        linie[licznik_nagrywanie] = "" + angle2;
+	    licznik_nagrywanie++;
+	}
+if(licznik_nagrywanie==ilosc_max)
+{
+    spriteBatch2.DrawString(sf, "ZAPISANO", new Vector2(200, 700), Color.White);
+    //StreamWriter sw = File.CreateText(@"C:/saved.txt");
+    //      for (int i = 0; i < ilosc_max; i++)
+    //          sw.WriteLine("" + linie[i]);
+    //sw.Close();
+nagrywanie=false;
+//wczytanie(); //zapisanie do wczytane_num
+
+wczytane = File.ReadAllLines(@"C:/saved.txt");
+for (int i = 0; i < wczytane.Length; i++)
+    wczytaneNum[i] = float.Parse(wczytane[i]);
+if (wczytaneNum.Last() < wczytaneNum[wczytaneNum.Length - 2])
+    globalRight = true;
+else
+    globalLeft = true;
+} 
+
+//(rêcznie ustawiamy odtwarzanie na true)
+
+if(nagrywanie == false && odtwarzanie == true && licznik_odtwarzanie<ilosc_max-1) //false, true
+{
+ //   spriteBatch2.DrawString(sf, "Nastepuje odczyt", new Vector2(200, 400), Color.White);
+
+    nagrywanie = false;
+    //wczytanie(); //zapisanie do wczytane_num
+    if (flagOd == false)
+    {
+        wczytane = File.ReadAllLines(@"C:/saved.txt");
+        for (int i = 0; i < wczytane.Length; i++)
+            wczytaneNum[i] = float.Parse(wczytane[i]);
+        if (wczytaneNum.Last() < wczytaneNum[wczytaneNum.Length - 2])
+            globalRight = true;
+        else
+            globalLeft = true;
+        flagOd = true;
+    }
+	licznik_odtwarzanie++;
+int i4=licznik_odtwarzanie;
+{
+
+                        //  spriteBatch2.DrawString(sf, "From file["+i4+"]: " + wczytaneNum[i4], new Vector2(200, 600), Color.White);
+
+                          if (wczytaneNum[i4] > angle2 && Math.Abs(wczytaneNum[i4]-angle2)>5)
+                          {
+                           //   spriteBatch2.DrawString(sf, ""+angle2+", "+"PRAWO", new Vector2(200, 800), Color.White);
+                              renderJoint(
+                               new Vector2(
+                               (rightHandFinal.X)
+                               , (rightHandFinal.Y)
+                               ), (rightHandFinal.Z), //rightHandNew.Z -> handDepth
+                               view, projection, 1.0f, new Vector3(1, 1, 1), 
+                               false, true,false,false); //hand true, ok false - czyli niby ok
+                
+
+                          }
+                          else if (wczytaneNum[i4] < angle2 && Math.Abs(wczytaneNum[i4] - angle2) > 5)
+                          {
+                             // spriteBatch2.DrawString(sf, ""+angle2+", "+"LEWO", new Vector2(200, 800), Color.White);
+
+                              renderJoint(
+                                new Vector2(
+                                (rightHandFinal.X)
+                                , (rightHandFinal.Y)
+                                ), (rightHandFinal.Z), //rightHandNew.Z -> handDepth
+                                view, projection, 1.0f, new Vector3(1, 1, 1),
+                                false, true, false, true);
+
+
+                             
+                          }
+                          else
+                          {
+                          //    spriteBatch2.DrawString(sf, "PRAWIDLOWO", new Vector2(200, 800), Color.White);
+                              renderJoint(
+                                    new Vector2(
+                                    (rightHandFinal.X)
+                                    , (rightHandFinal.Y)
+                                    ), (rightHandFinal.Z), //rightHandNew.Z -> handDepth
+                                    view, projection, 1.0f, new Vector3(1, 1, 1),
+                                    false, true, true, false); // pi razy oko ok, ale ZA BARDZO ODSTAJE!!! 
+                
+
+                          }
+                      }
+}
+
+/////////////////////////////////
+
+                /*
                   licznikod50do250++;
-                  if (250 > licznikod50do250 && licznikod50do250 >= 50)
+                  if (licznikod50do250 >= 50 && licznikod50do250 < 250)
                   {
                       spriteBatch2.DrawString(sf, "Nagrywanie!", new Vector2(200, 700), Color.White);
                     
@@ -1042,7 +1106,7 @@ namespace KinectFundamentals
                    , (rightHandFinal.Y)
                    ), (rightHandFinal.Z), //rightHandNew.Z -> handDepth
                view, projection, 1.0f, new Vector3(1, 1, 1), 
-               false, true,false,false); // pi razy oko ok, ale ZA BARDZO ODSTAJE!!! 
+               false, true,false,false);
                 
 
                           }
@@ -1054,7 +1118,7 @@ new Vector2(
 , (rightHandFinal.Y)
 ), (rightHandFinal.Z), //rightHandNew.Z -> handDepth
 view, projection, 1.0f, new Vector3(1, 1, 1),
-false, true, false, true); // pi razy oko ok, ale ZA BARDZO ODSTAJE!!! 
+false, true, false, true);
 
 
                               spriteBatch2.DrawString(sf, "LEWO", new Vector2(200, 800), Color.White);
@@ -1074,6 +1138,7 @@ false, true, true, false); // pi razy oko ok, ale ZA BARDZO ODSTAJE!!!
 
                           }
                       }
+                      */
                      // else
                      //     spriteBatch2.DrawString(sf, ""+wczytane[i4], new Vector2(200, 800), Color.White);
                       
@@ -1101,8 +1166,9 @@ false, true, true, false); // pi razy oko ok, ale ZA BARDZO ODSTAJE!!!
                       
                           //zaznaczaj w prawo (JAK?)
                       }
-                       */
+                       
                   }
+                       */
                  spriteBatch2.End();
 
                 // ---------------------------- !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ------------------------------------------------
@@ -1111,7 +1177,6 @@ false, true, true, false); // pi razy oko ok, ale ZA BARDZO ODSTAJE!!!
                 #region stare
                 //foreach (ModelMesh mesh in mdRH.Meshes) //right hand
                 //{
-                //    //This is where the mesh orientation is set
                 //    foreach (BasicEffect effect in mesh.Effects) //próba BE -> E
                 //    {
                 //        //effect.CurrentTechnique //AM
@@ -1129,13 +1194,11 @@ false, true, true, false); // pi razy oko ok, ale ZA BARDZO ODSTAJE!!!
 
                 //    }
 
-                //    //Draw the mesh, will use the effects set above.
                 //    mesh.Draw();
                 //}
 
                 //foreach (ModelMesh mesh in mdRH.Meshes) //right elbow
                 //{
-                //    //This is where the mesh orientation is set
                 //    foreach (BasicEffect effect in mesh.Effects) //próba BE -> E
                 //    {
                 //        //effect.CurrentTechnique //AM
@@ -1153,13 +1216,11 @@ false, true, true, false); // pi razy oko ok, ale ZA BARDZO ODSTAJE!!!
 
                 //    }
 
-                //    //Draw the mesh, will use the effects set above.
                 ////    mesh.Draw();
                 //}
 
                 //foreach (ModelMesh mesh in mdRH.Meshes) //left hand
                 //{
-                //    //This is where the mesh orientation is set
                 //    foreach (BasicEffect effect in mesh.Effects) //próba BE -> E
                 //    {
                 //        //effect.CurrentTechnique //AM
@@ -1176,12 +1237,10 @@ false, true, true, false); // pi razy oko ok, ale ZA BARDZO ODSTAJE!!!
 
                 //    }
 
-                //    //Draw the mesh, will use the effects set above.
                 //    mesh.Draw();
                 //}
                 //foreach (ModelMesh mesh in mdRH.Meshes) //left elbow
                 //{
-                //    //This is where the mesh orientation is set
                 //    foreach (BasicEffect effect in mesh.Effects) //próba BE -> E
                 //    {
                 //        //effect.CurrentTechnique //AM
@@ -1199,7 +1258,6 @@ false, true, true, false); // pi razy oko ok, ale ZA BARDZO ODSTAJE!!!
 
                 //    }
 
-                //    //Draw the mesh, will use the effects set above.
                 //    mesh.Draw();
                 //}
 
@@ -1207,7 +1265,6 @@ false, true, true, false); // pi razy oko ok, ale ZA BARDZO ODSTAJE!!!
                 #region stare2
                 //foreach (ModelMesh mesh in mdRH.Meshes) //head
                 //{
-                //    //This is where the mesh orientation is set
                 //    foreach (BasicEffect effect in mesh.Effects) //próba BE -> E
                 //    {
                 //        effect.EnableDefaultLighting();
@@ -1222,7 +1279,6 @@ false, true, true, false); // pi razy oko ok, ale ZA BARDZO ODSTAJE!!!
                 //            Matrix.CreateScale(9);
                 //    }
 
-                //    //Draw the mesh, will use the effects set above.
                 //   // mesh.Draw();
                 //}
                 ///////
@@ -1357,7 +1413,6 @@ false, true, true, false); // pi razy oko ok, ale ZA BARDZO ODSTAJE!!!
                     //        //                ))
                     //        //       *
                     //        //        // problem g³êbokoœci (ta druga oœ obrotu)
-                    //        //    #region dupa
                     //        //        /*
                     //        //       Matrix.CreateRotationZ
                     //        //       (
@@ -1369,7 +1424,6 @@ false, true, true, false); // pi razy oko ok, ale ZA BARDZO ODSTAJE!!!
 
                     //        //       *
                     //        //  */
-                    //        //    #endregion dupa
                     //        //       Matrix.CreateTranslation(
                     //        //       0 - elbowRdepth * 100,
                     //        //       120.0f - elbowRposition.Y * 0.6f,
@@ -1377,7 +1431,6 @@ false, true, true, false); // pi razy oko ok, ale ZA BARDZO ODSTAJE!!!
 
                     //        //}
 
-                    //        ////Draw the mesh, will use the effects set above.
                     //        //mesh.Draw();
                     //        #endregion old
                     //    //    // TO JEST OK, KLOCEK:
@@ -1402,7 +1455,6 @@ false, true, true, false); // pi razy oko ok, ale ZA BARDZO ODSTAJE!!!
                         foreach (ModelMesh mesh in mdBox.Meshes)
                         {
                             #region old
-                            ////This is where the mesh orientation is set
                             //foreach (BasicEffect effect in mesh.Effects) //próba BE -> E
                             //{
                             //    //effect.CurrentTechnique //AM
@@ -1439,7 +1491,6 @@ false, true, true, false); // pi razy oko ok, ale ZA BARDZO ODSTAJE!!!
                             //    elbowRdepth,
                             //    view, projection, modelAbsTrans);
                             #region old
-                            ////This is where the mesh orientation is set
                             //foreach (BasicEffect effect in mesh.Effects) //próba BE -> E
                             //{
                             //    //effect.CurrentTechnique //AM
@@ -1467,7 +1518,6 @@ false, true, true, false); // pi razy oko ok, ale ZA BARDZO ODSTAJE!!!
 
                             //}
 
-                            ////Draw the mesh, will use the effects set above.
                             //mesh.Draw();
                             #endregion old
                         }
